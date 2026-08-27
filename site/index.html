@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07111f" />
+    <meta name="description" content="Author, localize, and rehearse descriptions for important browser-game states." />
+    <title>A11y Playtest Captioner — describe the state, test the experience</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="A11y Playtest Captioner home">
+        <svg aria-hidden="true" viewBox="0 0 36 36"><path d="M5 8.5A3.5 3.5 0 0 1 8.5 5h19A3.5 3.5 0 0 1 31 8.5v13a3.5 3.5 0 0 1-3.5 3.5H18l-7 6v-6H8.5A3.5 3.5 0 0 1 5 21.5z"/><path d="M11 12h14M11 18h9"/></svg>
+        <span>A11y Playtest <strong>Captioner</strong></span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#workspace">Workspace</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/B-Divyesh/sf-a11y-playtest-captioner">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span aria-hidden="true"></span> An authoring layer for game state</p>
+          <h1 id="hero-title">Describe what the canvas can’t say.</h1>
+          <p class="lede">Write concise, localized descriptions for critical game moments. Then hear them and rehearse every action in keyboard order—before playtest day.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#workspace">Open the workspace</a>
+            <a class="button quiet" href="#install">Use the library <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="privacy-note"><svg aria-hidden="true" viewBox="0 0 20 20"><path d="M10 2 4 4.7v4.1c0 4 2.4 7.3 6 9.2 3.6-1.9 6-5.2 6-9.2V4.7z"/><path d="m7.5 10 1.7 1.7 3.5-4"/></svg> No account. Drafts and speech stay on this device.</p>
+        </div>
+        <figure class="hero-art">
+          <img src="/hero-caption-landscape.webp" width="768" height="512" alt="Translucent caption planes connected across a dark game-state landscape" fetchpriority="high" />
+          <figcaption><span>STATE / SIGNAL MAP</span><strong>10 moments, one intentional route</strong></figcaption>
+        </figure>
+      </section>
+
+      <section class="workspace-section" id="workspace" aria-labelledby="workspace-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><span aria-hidden="true"></span> Local workspace</p>
+            <h2 id="workspace-title">Build the layer players will hear</h2>
+          </div>
+          <p>Drafts save automatically in this browser. Export JSON to move them into your game.</p>
+        </div>
+
+        <div class="app-shell" id="captioner-app" aria-busy="true">
+          <aside class="state-rail" aria-labelledby="states-title">
+            <div class="rail-heading">
+              <div><span class="step-number">01</span><h3 id="states-title">States</h3></div>
+              <button class="icon-button" id="add-state" type="button" aria-label="Add game state" title="Add game state">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
+            <div id="state-list" class="state-list"></div>
+            <button class="sample-button" id="load-sample" type="button">Load example project</button>
+          </aside>
+
+          <section class="author-pane" aria-labelledby="author-title">
+            <div class="pane-heading">
+              <div><span class="step-number">02</span><h3 id="author-title">Author</h3></div>
+              <p class="save-state" id="save-state" role="status" aria-live="polite">Stored locally</p>
+            </div>
+            <div id="author-content"></div>
+          </section>
+
+          <aside class="review-pane" aria-labelledby="review-title">
+            <div class="pane-heading">
+              <div><span class="step-number">03</span><h3 id="review-title">Rehearse</h3></div>
+              <span class="on-device">On device</span>
+            </div>
+            <div id="review-content"></div>
+          </aside>
+        </div>
+        <div class="workspace-footer">
+          <p id="offline-status" role="status"><span class="status-dot" aria-hidden="true"></span><span>Ready offline after first visit</span></p>
+          <div class="project-actions">
+            <label class="button quiet file-button" for="import-file">Import JSON</label>
+            <input id="import-file" type="file" accept="application/json,.json" />
+            <button class="button quiet" id="export-project" type="button">Export project</button>
+          </div>
+        </div>
+        <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+      </section>
+
+      <section class="install-section" id="install" aria-labelledby="install-title">
+        <div>
+          <p class="eyebrow"><span aria-hidden="true"></span> Zero dependencies</p>
+          <h2 id="install-title">Your state machine stays in charge.</h2>
+          <p>Register what matters, activate it from your game loop, and use the same JSON you rehearsed here. The library adds no telemetry and makes no accessibility claims for you.</p>
+        </div>
+        <div class="code-card">
+          <div class="code-top"><span>npm</span><button type="button" id="copy-install">Copy command</button></div>
+          <pre><code>npm install a11y-playtest-captioner</code></pre>
+          <pre class="code-example"><code><span class="code-dim">import</span> { createCaptioner } <span class="code-dim">from</span>
+  <span class="code-string">"a11y-playtest-captioner"</span>;
+
+captioner.activate(<span class="code-string">"bridge-out"</span>);</code></pre>
+        </div>
+      </section>
+
+      <section class="scope-note" aria-labelledby="scope-title">
+        <p class="eyebrow">Built for the handoff, not the checkbox</p>
+        <h2 id="scope-title">A rehearsal tool, not a compliance badge.</h2>
+        <p>This helps teams make intentional game state available for review. It does not replace disabled playtesters, accessibility audits, or the judgment needed to write useful descriptions.</p>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="/">A11y Playtest <strong>Captioner</strong></a>
+      <p>Free, open, and local-first.</p>
+      <nav aria-label="Legal"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-a11y-playtest-captioner">Source</a></nav>
+    </footer>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
