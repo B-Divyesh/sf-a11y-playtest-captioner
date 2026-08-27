@@ -1,0 +1,16 @@
+{
+  "slug": "a11y-playtest-captioner",
+  "title": "A11y Playtest Captioner",
+  "territory": "games-creative",
+  "user": "Browser-game creators who need to author and hear concise, multilingual descriptions for important visual game states before inviting disabled playtesters.",
+  "smallest_useful_product": "An npm library plus local preview page: developers register named canvas/game states, write localized descriptions and focus order, then test them with keyboard navigation and browser speech synthesis.",
+  "success_measure": "A pilot game adds descriptions for ten critical states in under one hour, and a keyboard-only reviewer can identify the active objective and available actions in 90% of scripted states.",
+  "artifact_class": "library-npm",
+  "monetization": "free",
+  "constraints": [
+    "Do not claim WCAG or game-accessibility compliance.",
+    "Descriptions are author-controlled.",
+    "Localized strings carry language tags.",
+    "Speech synthesis stays on device."
+  ]
+}
