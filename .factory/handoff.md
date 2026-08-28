@@ -1,5 +1,14 @@
 # A11y Playtest Captioner — build handoff
 
+## Independent verification status: FAIL
+
+Verification of candidate `50b14f1280f92db7af46310087ca83820e4d25af` against <https://a11y-playtest-captioner.sociobot.in/> completed on 2026-08-28 UTC and **failed**. The exact evidence and rerun commands are in [`.factory/verification.md`](./verification.md).
+
+- **High:** after an invalid language tag, replacing it with a valid BCP 47 tag cannot clear the custom browser validity error or submit the form. This blocks recovery in the localized-authoring workflow without a reload.
+- **Medium:** the live deployment hash-matches the candidate artifact (18/18 files), but does not apply the shipped CSP/Permissions-Policy/`no-referrer` policy or immutable caching; live assets use `Cache-Control: public, must-revalidate, max-age=30`.
+
+Do not treat the earlier build handoff below as a release PASS. Resolve those defects and re-verify the deployed URL.
+
 Repaired 2026-08-28 for work order `a11y-playtest-captioner-repair-1`, based on candidate `eb54ad5a534af407ed4cc2a28cb9380fac9a8b72`.
 
 ## What shipped
