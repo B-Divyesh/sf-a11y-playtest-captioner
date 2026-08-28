@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -11,10 +12,24 @@ function injectOfflineAssets() {
       const assets = (await readdir(resolve(output, "assets"))).map((file) => `/assets/${file}`);
       const workerPath = resolve(output, "sw.js");
       const worker = await readFile(workerPath, "utf8");
-      await writeFile(workerPath, worker.replace(
+      const shellFiles = [
+        "index.html",
+        "privacy/index.html",
+        "terms/index.html",
+        "hero-caption-landscape.webp",
+        "hero-caption-landscape-480.webp",
+        "favicon.svg",
+        ...assets.map((asset) => asset.slice(1))
+      ];
+      const hasher = createHash("sha256").update(worker);
+      for (const file of shellFiles) hasher.update(file).update(await readFile(resolve(output, file)));
+      const buildId = hasher.digest("hex").slice(0, 12);
+      const injected = worker.replace(
         "const BUILD_ASSETS = []; // __BUILD_ASSETS__",
         `const BUILD_ASSETS = ${JSON.stringify(assets)};`
-      ));
+      ).replaceAll("__BUILD_ID__", buildId);
+      if (injected === worker || injected.includes("__BUILD_ID__")) throw new Error("Service worker build markers were not injected.");
+      await writeFile(workerPath, injected);
     }
   };
 }

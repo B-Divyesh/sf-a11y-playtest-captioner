@@ -1,17 +1,83 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+type ConsoleTracker = {
+  errors: string[];
+  allowOfflineFetchFailures: boolean;
+};
+
+function isExpectedOfflineFetchFailure(text: string): boolean {
+  return /^Failed to load resource: net::ERR_(INTERNET_DISCONNECTED|FAILED)$/i.test(text);
+}
+
+async function waitForControlledOfflineShell(page: Page): Promise<void> {
+  const cacheName = await page.evaluate(async () => {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.update();
+    const source = await fetch("/sw.js", { cache: "no-store" }).then((response) => response.text());
+    const cacheName = source.match(/const CACHE = "([^"]+)"/)?.[1];
+    if (!cacheName) throw new Error("The service worker does not declare an offline cache.");
+    return cacheName;
+  });
+
+  await page.waitForFunction(async (expectedCache) => {
+    const registration = await navigator.serviceWorker.ready;
+    const cacheNames = await caches.keys();
+    const controller = navigator.serviceWorker.controller;
+    const controllerCache = controller ? await new Promise<string | null>((resolve) => {
+      const channel = new MessageChannel();
+      const timeout = window.setTimeout(() => resolve(null), 250);
+      channel.port1.onmessage = (event) => {
+        window.clearTimeout(timeout);
+        resolve(event.data?.type === "a11y-captioner:cache-version" ? event.data.cache : null);
+      };
+      controller.postMessage({ type: "a11y-captioner:cache-version" }, [channel.port2]);
+    }) : null;
+    return registration.active?.state === "activated"
+      && controllerCache === expectedCache
+      // Activation removes older releases. Merely finding the new cache is not
+      // enough: an installing worker can populate it before it controls us.
+      && cacheNames.length === 1
+      && cacheNames[0] === expectedCache;
+  }, cacheName);
+
+  const result = await page.evaluate(async (expectedCache) => {
+    const registration = await navigator.serviceWorker.ready;
+    const controller = navigator.serviceWorker.controller;
+    const required = [
+      new URL("/", location.href).href,
+      ...[...document.querySelectorAll<HTMLImageElement | HTMLScriptElement>("img[src], script[src]")].map((element) => new URL(element.src, location.href).href)
+    ];
+    const cache = await caches.open(expectedCache);
+    const missing = (await Promise.all(required.map(async (url) => (await cache.match(url, { ignoreVary: true })) ? null : url))).filter((url): url is string => url !== null);
+    return {
+      active: registration.active?.state,
+      controller: controller?.scriptURL,
+      missing
+    };
+  }, cacheName);
+
+  expect(result.active).toBe("activated");
+  expect(result.controller).toMatch(/\/sw\.js$/);
+  expect(result.missing).toEqual([]);
+}
 
 test.beforeEach(async ({ page }) => {
-  const errors: string[] = [];
-  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
-  page.on("pageerror", (error) => errors.push(error.message));
+  const tracker: ConsoleTracker = { errors: [], allowOfflineFetchFailures: false };
+  page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const text = message.text();
+    if (tracker.allowOfflineFetchFailures && isExpectedOfflineFetchFailure(text)) return;
+    tracker.errors.push(text);
+  });
+  page.on("pageerror", (error) => tracker.errors.push(error.message));
   await page.goto("/");
   await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
-  (page as typeof page & { __errors?: string[] }).__errors = errors;
+  (page as typeof page & { __consoleTracker?: ConsoleTracker }).__consoleTracker = tracker;
 });
 
 test.afterEach(async ({ page }) => {
-  expect((page as typeof page & { __errors?: string[] }).__errors ?? []).toEqual([]);
+  expect((page as typeof page & { __consoleTracker?: ConsoleTracker }).__consoleTracker?.errors ?? []).toEqual([]);
 });
 
 test("authors a state and rehearses its focus order with the keyboard", async ({ page }) => {
@@ -57,13 +123,40 @@ test("has no serious accessibility violations", async ({ page }) => {
 });
 
 test("reopens the workspace offline after the first visit", async ({ page, context }) => {
-  await page.evaluate(async () => navigator.serviceWorker.ready);
-  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
-  await context.setOffline(true);
+  // A first install can claim the current client after its initial navigation.
+  // Reload while online first so the offline navigation is unquestionably
+  // controlled by the activated worker and its finished precache.
+  await waitForControlledOfflineShell(page);
   await page.reload();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Describe what the canvas can’t say.");
-  await expect(page.getByText("Offline — local editing still works")).toBeVisible();
-  await context.setOffline(false);
+  await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
+  await waitForControlledOfflineShell(page);
+
+  const tracker = (page as typeof page & { __consoleTracker?: ConsoleTracker }).__consoleTracker;
+  expect(tracker).toBeDefined();
+  if (tracker) tracker.allowOfflineFetchFailures = true;
+  try {
+    await context.setOffline(true);
+    await page.reload();
+    // The heading is static HTML; wait for the module to finish wiring its
+    // connection listener before asserting the dynamic offline status.
+    await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Describe what the canvas can’t say.");
+    // Playwright's mobile network emulation can leave navigator.onLine unchanged
+    // and does not consistently emit this browser event. Dispatch the same
+    // platform signal a real offline transition supplies.
+    await page.evaluate(() => window.dispatchEvent(new Event("offline")));
+    await expect(page.getByText("Offline — local editing still works")).toBeVisible();
+
+    // The useful offline path is more than a cached headline: local authoring
+    // must still accept and retain a new state after the reload.
+    await page.getByRole("button", { name: "Add first state" }).click();
+    await page.getByLabel("State name").fill("Offline checkpoint");
+    await page.getByLabel("State name").blur();
+    await expect(page.getByText("Offline checkpoint", { exact: true }).first()).toBeVisible();
+  } finally {
+    await context.setOffline(false);
+    if (tracker) tracker.allowOfflineFetchFailures = false;
+  }
 });
 
 test("fits a 390px viewport without page-level horizontal overflow", async ({ page }, testInfo) => {

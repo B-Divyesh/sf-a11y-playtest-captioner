@@ -519,22 +519,24 @@ required<HTMLButtonElement>("copy-install").addEventListener("click", async (eve
 });
 
 const offlineStatus = required<HTMLElement>("offline-status");
-function updateConnection(): void {
+function updateConnection(isOnline = navigator.onLine): void {
   const text = offlineStatus.querySelector("span:last-child");
-  offlineStatus.classList.toggle("offline", !navigator.onLine);
-  if (text) text.textContent = navigator.onLine ? "Ready offline after first visit" : "Offline — local editing still works";
+  offlineStatus.classList.toggle("offline", !isOnline);
+  if (text) text.textContent = isOnline ? "Ready offline after first visit" : "Offline — local editing still works";
 }
-window.addEventListener("online", updateConnection);
-window.addEventListener("offline", updateConnection);
+// The events are authoritative when a browser's network stack changes. This
+// avoids depending on a stale navigator.onLine value during a reload.
+window.addEventListener("online", () => updateConnection(true));
+window.addEventListener("offline", () => updateConnection(false));
 updateConnection();
 
 render();
 if (startupMessage) showToast(startupMessage);
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {
+  navigator.serviceWorker.register("/sw.js").catch(() => {
     offlineStatus.classList.add("offline");
     const text = offlineStatus.querySelector("span:last-child");
     if (text) text.textContent = "Offline cache unavailable; local drafts still work";
-  }));
+  });
 }
