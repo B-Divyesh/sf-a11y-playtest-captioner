@@ -29,6 +29,7 @@ Verification completed locally:
 - `npx tsc --noEmit`: pass.
 - `npm run build`: pass (the exact clean deploy build); reproducibly creates `dist/lib` and `dist/site`.
 - `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173`: HTTP 200, title and `lang`, exactly one `h1`, main landmark, all image alt text and button labels present, no console errors; local production-preview load 678ms. `/privacy/` and `/terms/` each returned HTTP 200.
+- Deployment: `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site` uploaded the static artifact to Azure Static Web Apps. `/opt/fleet/lib/verify-url.sh https://a11y-playtest-captioner.sociobot.in` then passed: HTTPS 200, product title/identity, `lang`, one `h1`, main landmark, image alt text, labeled buttons, and no console errors (843ms live load).
 - `npm audit`: 0 vulnerabilities.
 - `npm pack --dry-run`: 12 files, 16.7 KB packed / 66.8 KB unpacked.
 - Axe browser scan: no serious or critical violations at desktop or 390px.
