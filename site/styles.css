@@ -131,10 +131,10 @@ label small { display: block; margin-top: 5px; color: var(--soft); font-weight: 
 .cue-heading h4 { margin: 0; font-size: 18px; }
 .cue-heading p { margin: 3px 0 0; color: var(--soft); font-size: 14px; }
 .cue-list { padding: 0; margin: 16px 0 0; list-style: none; }
-.cue-item { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; padding: 15px 0; border-top: 1px solid #2b455a; }
+.cue-item { display: grid; grid-template-columns: 104px 1fr auto; gap: 12px; align-items: center; padding: 15px 0; border-top: 1px solid #2b455a; }
 .cue-order { color: var(--cyan); font: 12px ui-monospace, monospace; text-align: center; }
-.cue-order div { display: flex; gap: 3px; margin-top: 5px; }
-.cue-order button { width: 22px; height: 26px; padding: 0; border: 0; border-radius: 4px; color: var(--muted); background: #183044; cursor: pointer; }
+.cue-order div { display: flex; gap: 8px; margin-top: 5px; }
+.cue-order button { width: 44px; height: 44px; padding: 0; border: 0; border-radius: 6px; color: var(--muted); background: #183044; cursor: pointer; }
 .cue-order button:disabled { opacity: .32; cursor: default; }
 .cue-fields { display: grid; grid-template-columns: .8fr 1.2fr; gap: 10px; }
 .cue-fields input { margin-top: 4px; }
@@ -174,13 +174,13 @@ kbd { padding: 2px 5px; border: 1px solid currentColor; border-radius: 4px; font
 .project-actions { display: flex; gap: 10px; }
 #import-file { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
 .toast { position: fixed; z-index: 50; right: 24px; bottom: 24px; max-width: min(440px, calc(100vw - 48px)); padding: 14px 16px; border: 1px solid var(--cyan); border-radius: 10px; color: var(--text); background: #10283a; box-shadow: var(--shadow); }
-.toast button { min-height: 40px; margin-left: 10px; border: 0; border-radius: 6px; color: var(--cyan); background: transparent; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.toast button { min-height: 44px; margin-left: 10px; border: 0; border-radius: 6px; color: var(--cyan); background: transparent; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 .install-section { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 120px 0; display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 90px; }
 .install-section > div > p:last-child { max-width: 570px; margin: 24px 0 0; color: var(--muted); font-size: 18px; }
 .code-card { border: 1px solid var(--frost); border-radius: 18px; overflow: hidden; background: #091725; box-shadow: var(--shadow); }
 .code-top { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid #2b455a; color: var(--soft); font: 12px ui-monospace, monospace; }
-.code-top button { min-height: 36px; border: 0; color: var(--cyan); background: transparent; cursor: pointer; }
+.code-top button { min-height: 44px; border: 0; color: var(--cyan); background: transparent; cursor: pointer; }
 pre { margin: 0; padding: 24px; overflow-x: auto; font: 14px/1.6 ui-monospace, monospace; }
 .code-example { border-top: 1px solid #2b455a; color: var(--text); }
 .code-dim { color: #9fb8c7; }
@@ -250,7 +250,7 @@ footer nav { justify-content: end; }
   .field-row.two-up, .cue-fields { grid-template-columns: 1fr; }
   .language-bar { align-items: stretch; flex-direction: column; }
   .add-language-form { grid-template-columns: 1fr 54px; }
-  .cue-item { grid-template-columns: 42px 1fr; align-items: start; }
+  .cue-item { grid-template-columns: 104px 1fr; align-items: start; }
   .remove-cue { grid-column: 2; justify-self: start; }
   .caption-monitor { min-height: 350px; }
   .workspace-footer { align-items: stretch; flex-direction: column; }

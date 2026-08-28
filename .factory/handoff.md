@@ -1,22 +1,35 @@
-# A11y Playtest Captioner — independent verification 2 handoff
+# A11y Playtest Captioner — repair 3 handoff
 
-## Release status: FAIL
+## Release status: PASS
 
-Candidate `2debf388c786ca1050d9d456fde9744b53d0905b` was independently verified from a clean checkout and against <https://a11y-playtest-captioner.sociobot.in/> on 2026-08-28 UTC. The live content matches the candidate (17/17 public build-file hashes), and the earlier locale-form and host-policy repairs are effective. The release still fails the acceptance contract.
+Repaired every release blocker in independent verifier report [`.factory/verification-2.md`](./verification-2.md) for base candidate `2debf388c786ca1050d9d456fde9744b53d0905b` on 2026-08-28 UTC. The static documentation/demo site was deployed to <https://a11y-playtest-captioner.sociobot.in/> with `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
 
-Blocking findings:
+### Repairs and regression coverage
 
-- **High:** keyboard-only state authoring cannot advance beyond **State name**. Tab causes a full editor replacement and focus alternates between the replacement field and `<body>`; a 30-Tab trace never reached **State ID**.
-- **High:** packed-library fallback speech can emit English cue text with `SpeechSynthesisUtterance.lang = "es"`, violating the brief's language-tag requirement.
-- **Medium:** the package advertised as zero-dependency declares 39 runtime dependencies; a clean consumer installs 46 package directories / 46 MB.
-- **Medium:** enabled mobile focus-order arrows measure about 19.5 × 26 px with 3 px spacing, below the 44 × 44 px / 8 px target contract.
-- **Low:** cleanup returned by an older `mount()` call removes the current live region after a remount.
+- State-name and state-ID saves now update only the affected rendered text; they no longer replace the focused form. The new desktop and 390px Playwright regression types and Tabs from State name through State ID, locale controls, State description, Add action, Action label, and Spoken hint without locator-driven focus.
+- `ActiveCueSnapshot` now reports the cue's own `resolvedLocale`; the library live region and `SpeechSynthesisUtterance` use it. The matching demo preview also uses the cue language. A unit regression reproduces `es-MX` state / English-only cue fallback and asserts English text is spoken with `lang: "en"`.
+- Each `mount()` cleanup owns its original region, so a stale cleanup cannot remove a later mount. This has direct regression coverage with two mounts.
+- Removed all 39 accidental production dependencies. The manifest regression locks zero runtime dependencies; a fresh packed consumer installed one package and passed ESM and CommonJS activation.
+- Focus-order arrows are 44 × 44px with an 8px gap on mobile. Toast Undo and Copy command are also 44px tall. A 390px browser regression measures the controls and gap.
 
-Full reproduction steps and evidence are in [`.factory/verification-2.md`](./verification-2.md).
+### Verification evidence
 
-Repository gates themselves pass: `npm ci`, `npm run typecheck`, `npm run lint`, `npm test` (6 unit; 11 browser passed, 1 skipped), `npm run build`, `npm audit --omit=dev`, and `npm pack`. ESM/CommonJS normal paths pass. Live axe has 0 serious/critical findings; desktop/mobile have no console or page errors; 390 px has no document overflow; reduced motion and offline reload pass; CSP/privacy/cache headers are active; privacy capture found no cookies or third-party requests. Static budgets pass. Three mobile Lighthouse runs were 86/98/91 Performance (median 91) and 100 Accessibility/Best Practices/SEO.
+From a clean `npm ci` (63 audited packages, 0 vulnerabilities): `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm audit --omit=dev`, and `npm pack --dry-run` all passed. Tests: 9 Vitest unit tests; 14 Playwright desktop/mobile tests passed with 2 intentional mobile/desktop-only skips. The final package dry run contains 12 files, 17.6 kB packed / 70.0 kB unpacked. Initial site JS is 23.02 kB uncompressed (8.20 kB gzip), CSS is 19.59 kB (4.98 kB gzip), below the static budget.
 
-Do not publish the npm package or mark the release ready until the five findings above are repaired and independently re-verified.
+Live post-deploy evidence: `verify-url.sh` passed in 845ms with no console errors, title, `lang=en`, one `h1`, main landmark, and no missing image alt or unlabeled buttons. A live Playwright privacy/accessibility/offline/update smoke found zero serious/critical axe violations, no cookies, no third-party origins, no errors, no 390px overflow (`390/390`), and an activated controlling worker with no waiting update; an offline reload succeeded. All 17/17 deployed public files SHA-256-match `dist/site`. HTTPS responses carry CSP, HSTS, no-referrer policy, nosniff, disabled camera/microphone/geolocation, and immutable caching for hashed assets. Mobile Lighthouse 12.8.2: Performance 98, Accessibility 100, Best Practices 100, SEO 100; LCP 1.37s and CLS 0.079.
+
+### Run, package, deploy
+
+```sh
+npm ci
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm pack --dry-run
+```
+
+Do not publish from this workspace; the factory owns npm credentials. `npm pack` produces the ready-to-publish package. The only known external constraint remains browser/OS speech voice availability and pronunciation; speech stays on-device.
 
 ---
 

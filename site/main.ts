@@ -221,7 +221,7 @@ function renderReview(): void {
       <div class="monitor-top"><span>ACTIVE STATE</span><span>${esc(stateText.locale)}</span></div>
       <h4>${esc(state.name)}</h4>
       <p id="preview-description">${esc(stateText.text) || '<span class="missing-text">Description missing in this language.</span>'}</p>
-      <div class="active-cue" id="active-cue" aria-live="polite" aria-atomic="true">
+      <div class="active-cue" id="active-cue" aria-live="polite" aria-atomic="true"${cue && label ? ` lang="${esc(label.locale)}"` : ""}>
         ${cue && label && hint ? `<span>ACTION ${cueIndex + 1} / ${state.focusOrder.length}</span><strong>${esc(label.text)}</strong><p>${esc(hint.text) || "No spoken hint yet."}</p>` : `<span>FOCUS ORDER</span><p>${state.focusOrder.length ? "Press Right arrow to begin the action review." : "No actions have been authored for this state."}</p>`}
       </div>
     </div>
@@ -252,8 +252,8 @@ function bindWorkspace(): void {
   required<HTMLInputElement>("state-name").addEventListener("input", (event) => {
     state.name = (event.target as HTMLInputElement).value;
     save();
+    syncRenderedStateName(state);
   });
-  required<HTMLInputElement>("state-name").addEventListener("blur", render);
   required<HTMLInputElement>("state-id").addEventListener("change", (event) => updateStateId(state, event.target as HTMLInputElement));
   required<HTMLTextAreaElement>("state-description").addEventListener("input", (event) => {
     state.descriptions[selectedLocale] = (event.target as HTMLTextAreaElement).value;
@@ -295,7 +295,23 @@ function updateStateId(state: EditableState, input: HTMLInputElement): void {
   state.id = next;
   selectedId = next;
   save();
-  render();
+  syncRenderedStateId(state);
+}
+
+function syncRenderedStateName(state: EditableState): void {
+  const active = stateList.querySelector<HTMLElement>(".state-item.active");
+  active?.querySelector("strong")?.replaceChildren(state.name);
+  const deleteButton = document.getElementById("delete-state");
+  if (deleteButton) deleteButton.textContent = `Delete “${state.name}”`;
+  const previewHeading = document.querySelector("#caption-monitor h4");
+  if (previewHeading) previewHeading.textContent = state.name;
+}
+
+function syncRenderedStateId(state: EditableState): void {
+  const active = stateList.querySelector<HTMLElement>(".state-item.active");
+  if (!active) return;
+  active.dataset.selectState = state.id;
+  active.querySelector("small")?.replaceChildren(state.id);
 }
 
 function addLanguage(event: SubmitEvent, state: EditableState): void {
@@ -450,7 +466,9 @@ function speakPreview(state: EditableState): void {
   }
   const stateText = resolved(state.descriptions, selectedLocale);
   const cue = cueIndex >= 0 ? state.focusOrder[cueIndex] : undefined;
-  const cueText = cue ? `${resolved(cue.labels, selectedLocale).text}. ${resolved(cue.descriptions, selectedLocale).text}` : "";
+  const cueLabel = cue ? resolved(cue.labels, selectedLocale) : null;
+  const cueHint = cue ? resolved(cue.descriptions, selectedLocale) : null;
+  const cueText = cueLabel && cueHint ? `${cueLabel.text}. ${cueHint.text}` : "";
   const text = cueText || `${state.name}. ${stateText.text}`;
   if (!text.trim()) {
     showToast("Write a description before speaking this state.");
@@ -458,7 +476,7 @@ function speakPreview(state: EditableState): void {
   }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = stateText.locale;
+  utterance.lang = cueLabel?.locale ?? stateText.locale;
   window.speechSynthesis.speak(utterance);
   showToast(`Speaking in ${utterance.lang}.`);
 }

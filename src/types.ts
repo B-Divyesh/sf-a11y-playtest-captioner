@@ -26,6 +26,8 @@ export interface ActiveCueSnapshot {
   readonly id: string;
   readonly label: string;
   readonly description: string;
+  /** The BCP 47 tag of the localized cue text currently being announced. */
+  readonly resolvedLocale: string | null;
   readonly position: number;
   readonly total: number;
 }

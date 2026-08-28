@@ -104,6 +104,33 @@ test("authors a state and rehearses its focus order with the keyboard", async ({
   await expect(page.locator("#preview-description")).toContainText("north gate is closing");
 });
 
+test("keeps natural Tab order through state authoring after immediate saves", async ({ page }) => {
+  await page.getByRole("button", { name: "Add first state" }).click();
+
+  // addState selects State name, so everything from here is genuine keyboard
+  // navigation rather than locator-driven focus changes.
+  await page.keyboard.type("Gate warning");
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("State ID")).toBeFocused();
+  await page.keyboard.press("ControlOrMeta+A");
+  await page.keyboard.type("gate-warning");
+  await page.keyboard.press("Tab");
+  await expect(page.locator("[data-locale='en']")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Language tag")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Add", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel(/State description/)).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Add action" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByLabel("Action label")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Spoken hint")).toBeFocused();
+  await expect(page.getByText("Gate warning", { exact: true }).first()).toBeVisible();
+});
+
 test("recovers from an invalid language tag and adds the corrected locale", async ({ page }) => {
   await page.getByRole("button", { name: "Add first state" }).click();
   const language = page.getByLabel("Language tag");
@@ -187,4 +214,24 @@ test("fits a 390px viewport without page-level horizontal overflow", async ({ pa
   expect(dimensions.scroll).toBeLessThanOrEqual(dimensions.client + 1);
   await page.locator("#workspace").scrollIntoViewIfNeeded();
   await expect(page.getByRole("button", { name: "Add game state" })).toBeVisible();
+});
+
+test("keeps mobile action controls and adjacent targets touch sized", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Mobile-specific touch-target assertion");
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const measurements = await page.locator("[data-cue-move], #copy-install").evaluateAll((controls) => controls.map((control) => {
+    const box = control.getBoundingClientRect();
+    return { width: box.width, height: box.height };
+  }));
+  expect(measurements).not.toHaveLength(0);
+  for (const measurement of measurements) {
+    expect(measurement.width).toBeGreaterThanOrEqual(44);
+    expect(measurement.height).toBeGreaterThanOrEqual(44);
+  }
+  const gap = await page.locator("[data-cue-index='0'] [data-cue-move]").evaluateAll((controls) => {
+    const [first, second] = controls.map((control) => control.getBoundingClientRect());
+    if (!first || !second) throw new Error("Expected two adjacent focus-order controls.");
+    return second.left - first.right;
+  });
+  expect(gap).toBeGreaterThanOrEqual(8);
 });

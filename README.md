@@ -50,7 +50,7 @@ disconnect();
 captioner.destroy();
 ```
 
-All localized strings are keyed by valid BCP 47 language tags. Speech uses the browser’s `speechSynthesis` API and never leaves the device. `mount()` adds a visually hidden polite live region next to the supplied game element; pass `{ liveRegion: false }` if the game already owns announcements.
+All localized strings are keyed by valid BCP 47 language tags. State and cue fallbacks resolve independently, and an active cue exposes its own `resolvedLocale` so its live-region and speech language tag always match the cue text. Speech uses the browser’s `speechSynthesis` API and never leaves the device. `mount()` adds a visually hidden polite live region next to the supplied game element; pass `{ liveRegion: false }` if the game already owns announcements.
 
 ## Public API
 

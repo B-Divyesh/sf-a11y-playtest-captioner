@@ -147,12 +147,16 @@ export function createCaptioner(options: CaptionerOptions = {}): Captioner {
     const cue = cueIndex >= 0 ? state.focusOrder?.[cueIndex] : undefined;
     let activeCue: ActiveCueSnapshot | null = null;
     if (cue) {
-      const [label] = resolveText(cue.labels, locale, fallbackLocale);
-      const [cueDescription] = resolveText(cue.descriptions, locale, fallbackLocale);
+      const [label, labelLocale] = resolveText(cue.labels, locale, fallbackLocale);
+      const [cueDescription, descriptionLocale] = resolveText(cue.descriptions, locale, fallbackLocale);
       activeCue = Object.freeze({
         id: cue.id,
         label,
         description: cueDescription,
+        // A cue may fall back independently of its parent state's description.
+        // Prefer its required label tag so fallback text reaches a matching
+        // browser voice instead of inheriting the state description's tag.
+        resolvedLocale: labelLocale ?? descriptionLocale,
         position: cueIndex + 1,
         total: state.focusOrder?.length ?? 0
       });
@@ -168,10 +172,14 @@ export function createCaptioner(options: CaptionerOptions = {}): Captioner {
       : `${value.stateName}. ${value.description}`.trim();
   }
 
+  function announcementLocale(value: CaptionerSnapshot): string {
+    return value.activeCue?.resolvedLocale ?? value.resolvedLocale ?? locale;
+  }
+
   function emit(): CaptionerSnapshot {
     const value = snapshot();
     if (liveRegion) {
-      liveRegion.lang = value.resolvedLocale ?? locale;
+      liveRegion.lang = announcementLocale(value);
       liveRegion.textContent = announcement(value);
     }
     listeners.forEach((listener) => listener(value));
@@ -235,7 +243,7 @@ export function createCaptioner(options: CaptionerOptions = {}): Captioner {
     if (!text) return false;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = value.resolvedLocale ?? locale;
+    utterance.lang = announcementLocale(value);
     const base = utterance.lang.split("-")[0]?.toLowerCase();
     utterance.voice = window.speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase() === utterance.lang.toLowerCase())
       ?? window.speechSynthesis.getVoices().find((voice) => voice.lang.split("-")[0]?.toLowerCase() === base)
@@ -249,8 +257,9 @@ export function createCaptioner(options: CaptionerOptions = {}): Captioner {
     if (!(element instanceof Element)) throw new TypeError("mount() requires a DOM Element.");
     liveRegion?.remove();
     liveRegion = null;
+    let region: HTMLElement | null = null;
     if (mountOptions.liveRegion !== false) {
-      const region = element.ownerDocument.createElement("div");
+      region = element.ownerDocument.createElement("div");
       region.dataset.a11yPlaytestCaptioner = "live-region";
       region.className = "a11y-playtest-captioner-live-region";
       region.setAttribute("role", "status");
@@ -265,8 +274,9 @@ export function createCaptioner(options: CaptionerOptions = {}): Captioner {
       emit();
     }
     const unmount = () => {
-      liveRegion?.remove();
-      liveRegion = null;
+      // A stale cleanup owns only its own region, never a later remount.
+      region?.remove();
+      if (liveRegion === region) liveRegion = null;
       cleanup.delete(unmount);
     };
     cleanup.add(unmount);

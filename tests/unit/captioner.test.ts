@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { CaptionerValidationError, createCaptioner, type CaptionState } from "../../src/index";
 
 const state: CaptionState = {
@@ -71,5 +72,86 @@ describe("createCaptioner", () => {
     const captioner = createCaptioner({ states: [state] });
     captioner.activate("bridge-out");
     expect(captioner.speak()).toBe(false);
+  });
+
+  it("uses the active cue's resolved fallback locale for speech", () => {
+    const speak = vi.fn();
+    class FakeUtterance {
+      lang = "";
+      voice: SpeechSynthesisVoice | null = null;
+      constructor(readonly text: string) {}
+    }
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    vi.stubGlobal("window", {
+      speechSynthesis: { cancel: vi.fn(), getVoices: () => [], speak }
+    });
+
+    try {
+      const captioner = createCaptioner({
+        locale: "es-MX",
+        fallbackLocale: "en",
+        states: [{
+          id: "gate",
+          name: "Gate",
+          descriptions: { es: "La puerta está cerrada.", en: "The gate is closed." },
+          focusOrder: [{ id: "lever", labels: { en: "Lever" }, descriptions: { en: "Press E." } }]
+        }]
+      });
+      captioner.activate("gate");
+      const snapshot = captioner.moveFocus("next");
+
+      expect(snapshot.activeCue).toMatchObject({ label: "Lever", description: "Press E.", resolvedLocale: "en" });
+      expect(captioner.speak()).toBe(true);
+      expect(speak).toHaveBeenCalledWith(expect.objectContaining({ text: "Lever. Press E. 1 of 1.", lang: "en" }));
+      captioner.destroy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("keeps a newer live region when a stale mount cleanup runs", () => {
+    class FakeRegion {
+      dataset: Record<string, string> = {};
+      style: Record<string, string> = {};
+      className = "";
+      lang = "";
+      textContent = "";
+      parent: FakeHost | null = null;
+      setAttribute(): void {}
+      remove(): void { this.parent?.regions.delete(this); }
+    }
+    class FakeHost {
+      readonly regions = new Set<FakeRegion>();
+      readonly ownerDocument = { createElement: () => new FakeRegion() };
+      insertAdjacentElement(_where: InsertPosition, region: Element): void {
+        const managed = region as unknown as FakeRegion;
+        managed.parent = this;
+        this.regions.add(managed);
+      }
+    }
+    vi.stubGlobal("Element", FakeHost);
+
+    try {
+      const captioner = createCaptioner();
+      const first = new FakeHost();
+      const second = new FakeHost();
+      const unmountFirst = captioner.mount(first as unknown as Element);
+      const unmountSecond = captioner.mount(second as unknown as Element);
+
+      expect(first.regions.size).toBe(0);
+      expect(second.regions.size).toBe(1);
+      unmountFirst();
+      expect(second.regions.size).toBe(1);
+      unmountSecond();
+      expect(second.regions.size).toBe(0);
+      captioner.destroy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("keeps the published artifact zero-dependency", () => {
+    const manifest = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { dependencies?: Record<string, string> };
+    expect(manifest.dependencies ?? {}).toEqual({});
   });
 });
