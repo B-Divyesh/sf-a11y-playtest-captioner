@@ -104,6 +104,28 @@ test("authors a state and rehearses its focus order with the keyboard", async ({
   await expect(page.locator("#preview-description")).toContainText("north gate is closing");
 });
 
+test("recovers from an invalid language tag and adds the corrected locale", async ({ page }) => {
+  await page.getByRole("button", { name: "Add first state" }).click();
+  const language = page.getByLabel("Language tag");
+
+  await language.fill("!!");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(language).toHaveJSProperty("validationMessage", "Enter a valid BCP 47 language tag, such as fr or pt-BR.");
+  expect(await language.evaluate((input) => (input as HTMLInputElement).validity.valid)).toBe(false);
+
+  // Use real keyboard editing after a native validation failure: this is the
+  // recovery path that previously remained blocked until a page reload.
+  await language.focus();
+  await language.press("ControlOrMeta+A");
+  await language.pressSequentially("es-MX");
+  expect(await language.evaluate((input) => (input as HTMLInputElement).validity.valid)).toBe(true);
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+
+  await expect(page.getByRole("button", { name: "es-MX" })).toBeVisible();
+  await expect(page.getByLabel(/State description/)).toHaveAccessibleName(/State description es-MX/);
+  await expect(page.locator("#review-language")).toHaveValue("es-MX");
+});
+
 test("loads, exports, and restores the example project", async ({ page }) => {
   await page.getByRole("button", { name: "Load example project" }).click();
   await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();

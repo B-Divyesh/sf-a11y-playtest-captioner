@@ -90,7 +90,7 @@ npm pack --dry-run
 
 ## Deploy
 
-Deploy `dist/site` as a static site. The included `_headers` file documents recommended immutable asset caching and security headers. The factory owns registry publishing and deployment credentials; contributors should not publish directly.
+Deploy `dist/site` as a static site. For the factory's Azure Static Web Apps deployment, the included `staticwebapp.config.json` applies the content-security, permissions, referrer, and immutable hashed-asset cache policies; `_headers` mirrors that policy for compatible static hosts. The factory owns registry publishing and deployment credentials; contributors should not publish directly.
 
 ## Privacy and scope
 

@@ -260,7 +260,13 @@ function bindWorkspace(): void {
     save();
     renderReviewOnly();
   });
-  required<HTMLFormElement>("add-language-form").addEventListener("submit", (event) => addLanguage(event, state));
+  const addLanguageForm = required<HTMLFormElement>("add-language-form");
+  const languageInput = required<HTMLInputElement>("new-language");
+  // Native constraint validation blocks a second submit before our submit
+  // handler can run. Clear an error from a previous attempt as soon as the
+  // author starts correcting the tag, so the corrected value can be submitted.
+  languageInput.addEventListener("input", () => languageInput.setCustomValidity(""));
+  addLanguageForm.addEventListener("submit", (event) => addLanguage(event, state));
   required<HTMLButtonElement>("add-cue").addEventListener("click", () => addCue(state));
   required<HTMLButtonElement>("delete-state").addEventListener("click", () => deleteState(state));
   document.querySelectorAll<HTMLElement>("[data-cue-index]").forEach((item) => bindCue(item, state));
