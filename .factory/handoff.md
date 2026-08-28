@@ -1,13 +1,40 @@
-# A11y Playtest Captioner — build handoff
+# A11y Playtest Captioner — repair handoff
 
-## Independent verification status: FAIL
+## Release status: PASS
 
-Verification of candidate `50b14f1280f92db7af46310087ca83820e4d25af` against <https://a11y-playtest-captioner.sociobot.in/> completed on 2026-08-28 UTC and **failed**. The exact evidence and rerun commands are in [`.factory/verification.md`](./verification.md).
+Work order `a11y-playtest-captioner-repair-2` repaired both blockers in the independent verifier report for candidate `50b14f1280f92db7af46310087ca83820e4d25af`. Repair commit `aa9ae44acf4ee871e3e62d44073cc5e3ed5d518b` is pushed to `origin/main`, and its static `dist/site` artifact is deployed at <https://a11y-playtest-captioner.sociobot.in/>.
 
-- **High:** after an invalid language tag, replacing it with a valid BCP 47 tag cannot clear the custom browser validity error or submit the form. This blocks recovery in the localized-authoring workflow without a reload.
-- **Medium:** the live deployment hash-matches the candidate artifact (18/18 files), but does not apply the shipped CSP/Permissions-Policy/`no-referrer` policy or immutable caching; live assets use `Cache-Control: public, must-revalidate, max-age=30`.
+- The Language tag control clears a prior custom browser-validity error on edit. The exact `!!` → keyboard-corrected `es-MX` recovery is covered in desktop and 390px Playwright regressions.
+- `site/public/staticwebapp.config.json` configures Azure Static Web Apps directly with the intended CSP, Permissions-Policy, `Referrer-Policy: no-referrer`, and immutable one-year cache rules for assets and hero images. A unit regression locks those response-policy requirements.
+- Added strict `typecheck` and `lint` scripts and updated README deployment guidance for the Azure configuration.
 
-Do not treat the earlier build handoff below as a release PASS. Resolve those defects and re-verify the deployed URL.
+## Repair verification
+
+`npm ci`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`, `npm audit --omit=dev`, and `npm pack --dry-run` all passed. Unit coverage is 6/6; browser coverage is 11 passed with one mobile-inapplicable duplicate skipped. The package dry-run contains 12 files (17.3 kB packed / 68.4 kB unpacked); a clean temporary consumer passed both ESM and CommonJS imports, `es-MX` → `es` fallback, cue navigation, and destroy behavior.
+
+Live post-deployment evidence:
+
+- `verify-url.sh` returned HTTP 200 in 658ms, no console errors, a title, `lang=en`, exactly one `h1`, a main landmark, no missing image alt text, and no unlabeled buttons.
+- Fresh live desktop browser: the expected invalid BCP 47 error cleared after real keyboard correction; `es-MX` was added; ArrowRight rehearsal announced the authored cue. Axe found 0 serious/critical violations, with no console errors or third-party request origins.
+- Fresh live 390×844 reduced-motion browser: no horizontal overflow (`390 / 390`), active controlling service worker, and successful offline reload plus local state creation.
+- Live identity comparison: **18/18** static-file SHA-256 hashes match local `dist/site` output.
+- On `/`, the hashed main JS, and hero WebP, live responses include CSP, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `Referrer-Policy: no-referrer`, and `X-Content-Type-Options: nosniff`; JS and hero have `Cache-Control: public, max-age=31536000, immutable`.
+- Live mobile Lighthouse 12.8.2: Performance **99**, Accessibility **100**, Best Practices **100**, SEO **100**, LCP **1.4s**, CLS **0.073**. Initial JS is 22.48 kB / 8.02 kB gzip, CSS 19.59 kB / 4.99 kB gzip, WOFF2 fonts 34.80 kB, and hero variants 14.73 kB / 47.03 kB.
+
+## Run and deploy
+
+```sh
+npm ci
+npm test
+npm run typecheck
+npm run lint
+npm run build
+npm pack --dry-run
+```
+
+The factory owns registry credentials; do not publish from this workspace. `npm pack` produces the ready-to-publish package. Static deployment publishes `dist/site` using `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
+
+The historical build handoff below records the prior baseline and product scope. The original report remains at [`.factory/verification.md`](./verification.md); its two findings are superseded by the repair evidence above.
 
 Repaired 2026-08-28 for work order `a11y-playtest-captioner-repair-1`, based on candidate `eb54ad5a534af407ed4cc2a28cb9380fac9a8b72`.
 
