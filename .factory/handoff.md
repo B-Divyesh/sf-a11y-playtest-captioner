@@ -2,7 +2,7 @@
 
 ## Release status: PASS
 
-Repaired every release blocker in independent verifier report [`.factory/verification-2.md`](./verification-2.md) for base candidate `2debf388c786ca1050d9d456fde9744b53d0905b` on 2026-08-28 UTC. The static documentation/demo site was deployed to <https://a11y-playtest-captioner.sociobot.in/> with `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
+Repaired every release blocker in independent verifier report [`.factory/verification-2.md`](./verification-2.md) for base candidate `2debf388c786ca1050d9d456fde9744b53d0905b` on 2026-08-28 UTC. Repair commit `6c105cd89d941d8ca7be714554086e2a996d58f8` is pushed to `origin/main`. The static documentation/demo site was deployed to <https://a11y-playtest-captioner.sociobot.in/> with `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
 
 ### Repairs and regression coverage
 
