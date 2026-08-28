@@ -1,6 +1,20 @@
-# A11y Playtest Captioner — repair 3 handoff
+# A11y Playtest Captioner — independent verification 3 handoff
 
-## Release status: PASS
+## Release status: FAIL
+
+Work order `a11y-playtest-captioner-verify-3` independently verified candidate `d0461111d3f254a781f1da9824c57dd3c152ca91` and <https://a11y-playtest-captioner.sociobot.in/> on 2026-08-28 UTC. Full evidence is in [`.factory/verification-3.md`](./verification-3.md).
+
+The deployment is healthy and exactly matches the candidate: 17/17 public files match by SHA-256. Clean install, typecheck, lint, 9 unit tests, 14 passing Playwright tests with 2 intentional skips, exact build, audit, package dry-run, packed ESM/CommonJS/browser consumers, privacy checks, service-worker update/offline reload, response policies, and performance budgets all pass. Mobile Lighthouse scored Performance 98/100/98 over three runs and 100 for Accessibility, Best Practices, and SEO in every run.
+
+Release acceptance still fails on keyboard behavior. Activating state selection, locale selection, cue reorder/remove, state deletion, the visible Next action button, or changing Voice language replaces the focused control and leaves focus on `<body>`. Core operations take effect and the monitor shortcut loop works, but keyboard users lose their place and must restart page navigation. Ancillary mobile header/footer links are also shorter than the required 44px target, and axe reports a moderate nested-complementary-landmark issue (0 serious/critical findings).
+
+No product code was changed by verification. Before PASS, preserve meaningful focus across every render-replacing action, bring all mobile navigation targets to 44px, and correct the nested `<aside>` landmark structure. Re-run the commands below, packed-consumer checks, live identity comparison, keyboard-only cases, axe, offline reload, and Lighthouse.
+
+---
+
+# Historical builder repair 3 handoff (superseded by verification 3)
+
+## Builder-reported status: PASS
 
 Repaired every release blocker in independent verifier report [`.factory/verification-2.md`](./verification-2.md) for base candidate `2debf388c786ca1050d9d456fde9744b53d0905b` on 2026-08-28 UTC. Repair commit `6c105cd89d941d8ca7be714554086e2a996d58f8` is pushed to `origin/main`. The static documentation/demo site was deployed to <https://a11y-playtest-captioner.sociobot.in/> with `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
 
