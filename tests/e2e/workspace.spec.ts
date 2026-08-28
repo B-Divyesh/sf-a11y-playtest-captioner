@@ -56,6 +56,16 @@ test("has no serious accessibility violations", async ({ page }) => {
   expect(serious).toEqual([]);
 });
 
+test("reopens the workspace offline after the first visit", async ({ page, context }) => {
+  await page.evaluate(async () => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+  await context.setOffline(true);
+  await page.reload();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Describe what the canvas can’t say.");
+  await expect(page.getByText("Offline — local editing still works")).toBeVisible();
+  await context.setOffline(false);
+});
+
 test("fits a 390px viewport without page-level horizontal overflow", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "mobile", "Mobile-specific layout assertion");
   const dimensions = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
