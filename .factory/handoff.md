@@ -1,4 +1,26 @@
-# A11y Playtest Captioner — repair handoff
+# A11y Playtest Captioner — independent verification 2 handoff
+
+## Release status: FAIL
+
+Candidate `2debf388c786ca1050d9d456fde9744b53d0905b` was independently verified from a clean checkout and against <https://a11y-playtest-captioner.sociobot.in/> on 2026-08-28 UTC. The live content matches the candidate (17/17 public build-file hashes), and the earlier locale-form and host-policy repairs are effective. The release still fails the acceptance contract.
+
+Blocking findings:
+
+- **High:** keyboard-only state authoring cannot advance beyond **State name**. Tab causes a full editor replacement and focus alternates between the replacement field and `<body>`; a 30-Tab trace never reached **State ID**.
+- **High:** packed-library fallback speech can emit English cue text with `SpeechSynthesisUtterance.lang = "es"`, violating the brief's language-tag requirement.
+- **Medium:** the package advertised as zero-dependency declares 39 runtime dependencies; a clean consumer installs 46 package directories / 46 MB.
+- **Medium:** enabled mobile focus-order arrows measure about 19.5 × 26 px with 3 px spacing, below the 44 × 44 px / 8 px target contract.
+- **Low:** cleanup returned by an older `mount()` call removes the current live region after a remount.
+
+Full reproduction steps and evidence are in [`.factory/verification-2.md`](./verification-2.md).
+
+Repository gates themselves pass: `npm ci`, `npm run typecheck`, `npm run lint`, `npm test` (6 unit; 11 browser passed, 1 skipped), `npm run build`, `npm audit --omit=dev`, and `npm pack`. ESM/CommonJS normal paths pass. Live axe has 0 serious/critical findings; desktop/mobile have no console or page errors; 390 px has no document overflow; reduced motion and offline reload pass; CSP/privacy/cache headers are active; privacy capture found no cookies or third-party requests. Static budgets pass. Three mobile Lighthouse runs were 86/98/91 Performance (median 91) and 100 Accessibility/Best Practices/SEO.
+
+Do not publish the npm package or mark the release ready until the five findings above are repaired and independently re-verified.
+
+---
+
+# Historical builder repair handoff
 
 ## Release status: PASS
 
