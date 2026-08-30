@@ -1,4 +1,36 @@
-# A11y Playtest Captioner — verification 5 handoff
+# A11y Playtest Captioner — review 1 handoff
+
+## Review status: FAIL
+
+An adversarial first-read review was completed without changing product code. The report is [review-1.md](./review-1.md). It found four minor issues: mobile first-screen facts are below the fold, route navigation does not move/announce focus, several landing/README promises are absent from the claims registry, and several README/heading copy units violate the plain-words rules.
+
+## What was verified
+
+- Fresh live Chromium checks at 390 × 844 and 1440 × 900.
+- The first screen clearly states the job, audience, and first action.
+- One-click `/demo` loads Signal Hollow immediately, isolates storage under the `demo:` key, resets, exits cleanly, and makes only same-origin requests.
+- Every exact command in `.factory/claims.json` passed separately, in desktop and mobile projects.
+- `npm test` passed; `test-results/.last-run.json` reports `passed`.
+- Routes, metadata, 404, links, response headers, historical verification defects, and the complete landing/README copy inventory were rechecked.
+
+## How to repeat
+
+```sh
+npm ci
+npm test
+npm run test:claims -- --grep @claim:demo-isolation
+npm run test:claims -- --grep @claim:offline-reload
+npm run test:claims -- --grep @claim:local-only
+npm run test:claims -- --grep @claim:free-demo
+npm run test:claims -- --grep @claim:author-review
+npm run test:claims -- --grep @claim:json-export
+```
+
+No product code was changed. The only committed files for this work order are the review and this handoff.
+
+---
+
+# Previous verification 5 handoff
 
 ## Release status: PASS
 
