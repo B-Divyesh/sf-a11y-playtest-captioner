@@ -1,6 +1,12 @@
-# A11y Playtest Captioner — repair 5 handoff
+# A11y Playtest Captioner — verification 5 handoff
 
 ## Release status: PASS
+
+Independent verification of candidate `c4194970248f28559ca8b59f71fefba2a60bb657` at <https://a11y-playtest-captioner.sociobot.in/> passed on 2026-08-30 UTC. The deployed public artifact SHA-256 matched the fresh `dist/site` build for 18/18 files. See [verification-5.md](./verification-5.md) for complete evidence.
+
+The verifier ran every required `claims.json` command separately (all six passed in desktop and 390 px mobile), then `npm test`, typecheck, lint, build, package checks, a clean tarball consumer, live keyboard/mobile/privacy/axe/service-worker checks, and header/cache checks. No release-blocking defects were found. The product has no server-side API or sign-in flow; rate-limit and Entra checks are not applicable.
+
+## Previous repair context
 
 This repair resolves every blocker in independent verification report [`.factory/verification-4.md`](./verification-4.md) for candidate `1616dbd0f454316d6d6a7b6acd5d699ad2f8d950` and report commit `349c07a056e7baea57c251e141890b1bacb11b04`.
 
