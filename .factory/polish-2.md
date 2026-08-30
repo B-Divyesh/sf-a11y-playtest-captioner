@@ -22,7 +22,7 @@ All review and prior polish files were read. The table includes prior findings s
 - Fresh clone `/tmp/a11y-captioner-clean.NMgb1M`: `npm ci`, every declared claim command independently, `npm test`, `npm run build`, and `npm pack --dry-run` passed. The full suite has 16 unit/static tests, a packed consumer test, 22 claim-browser checks, and 32 workspace-browser checks across desktop and 390 px mobile.
 - `npm run build` emits `dist/lib` and `dist/site`; build-surface verification proves the static demo metadata and exactly one demo `h1`.
 - Live `verify-url.sh` passed for `/` and `/demo`; screenshots and JSON evidence are under `/tmp/a11y-captioner-polish2-live.yXd4pL`.
-- Live Playwright AxeBuilder found zero violations on `/`, `/demo`, `/privacy/`, `/terms/`, and the designed 404. Lighthouse mobile accessibility scored 1.0 (`lighthouse-a11y.json`).
+- Live Playwright AxeBuilder found zero violations on `/`, `/demo`, `/privacy/`, `/terms/`, and the designed 404. Lighthouse mobile scored Performance 1.0 and Accessibility 1.0, with 1.35 s LCP and CLS 0 (`lighthouse-home.json`).
 - Live headers include CSP, `frame-ancestors 'none'`, no-referrer policy, permissions policy, and immutable hashed-asset caching. All 19 public production files SHA-256 match `dist/site`.
 
 No known product gaps remain.

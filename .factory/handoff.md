@@ -13,7 +13,7 @@ All cumulative findings in [polish-2.md](./polish-2.md) are resolved. `/demo` is
 - Clean clone: `/tmp/a11y-captioner-clean.NMgb1M` from repair commit; `npm ci` passed.
 - Every one of the 13 exact commands in `.factory/claims.json` passed independently in that clone.
 - Full clean-clone `npm test` passed: 16 unit/static tests, packed ESM/CJS consumer check, 22 browser claim checks, and 32 workspace checks across desktop and 390 × 844 mobile. `npm run build` created `dist/lib` and `dist/site`; `npm pack --dry-run` created the 12-file, 17.6 kB package.
-- Live `verify-url.sh` passed for home and demo. Fresh live AxeBuilder found zero violations on home, demo, Privacy, Terms, and 404. Lighthouse mobile accessibility: 1.0.
+- Live `verify-url.sh` passed for home and demo. Fresh live AxeBuilder found zero violations on home, demo, Privacy, Terms, and 404. Lighthouse mobile: Performance 1.0, Accessibility 1.0, LCP 1.35 s, CLS 0.
 - Live first-screen proof: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-demo-mobile-first-view.png`; structured checks and route focus result: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-regression.json`.
 - All 19 public files match the deployed `dist/site` byte-for-byte. Live CSP, no-referrer, permissions policy, and immutable hashed-asset cache headers are present.
 
