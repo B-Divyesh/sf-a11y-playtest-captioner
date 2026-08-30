@@ -22,7 +22,7 @@
   },
   {
     "id": "free-demo",
-    "claim": "Free: no account or payment is needed to use the demo.",
+    "claim": "Free: no account or payment.",
     "where": "landing facts, footer",
     "test": "npm run test:claims -- --grep @claim:free-demo",
     "sandbox": "fresh /demo context authors a cue and asserts no sign-in or payment control appears"
@@ -33,6 +33,34 @@
     "where": "landing lede, README",
     "test": "npm run test:claims -- --grep @claim:author-review",
     "sandbox": "fresh /demo context edits a caption and uses ArrowRight and End in the rehearsal monitor"
+  },
+  {
+    "id": "browser-storage",
+    "claim": "Projects stay in the current browser until you export them.",
+    "where": "landing workspace, privacy page, README",
+    "test": "npm run test:claims -- --grep @claim:browser-storage",
+    "sandbox": "fresh ordinary workspace authors a state, reloads, and asserts the saved state is restored from the ordinary browser-storage key"
+  },
+  {
+    "id": "language-tags-and-fallback",
+    "claim": "Localized captions use valid language tags, and speech uses the language of the action text.",
+    "where": "README usage notes and Public API",
+    "test": "npm run test:unit -- --testNamePattern @claim:language-tags-and-fallback",
+    "sandbox": "library fixture rejects an invalid tag, falls an English action back from Spanish, and asserts English speech language"
+  },
+  {
+    "id": "mounted-announcement",
+    "claim": "mount() adds a polite announcement unless liveRegion is disabled.",
+    "where": "README usage notes and Public API",
+    "test": "npm run test:unit -- --testNamePattern @claim:mounted-announcement",
+    "sandbox": "library DOM fixture asserts the managed polite region is adjacent to the supplied element and is omitted when disabled"
+  },
+  {
+    "id": "library-api",
+    "claim": "The documented library API creates, registers, activates, reviews, observes, and destroys isolated captioners.",
+    "where": "README Public API",
+    "test": "npm run test:unit -- --testNamePattern @claim:library-api",
+    "sandbox": "library fixture performs the documented state, locale, focus, subscription, and cleanup flow"
   },
   {
     "id": "json-export",

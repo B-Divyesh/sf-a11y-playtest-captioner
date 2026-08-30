@@ -154,4 +154,86 @@ describe("createCaptioner", () => {
     const manifest = JSON.parse(readFileSync(new URL("../../package.json", import.meta.url), "utf8")) as { dependencies?: Record<string, string> };
     expect(manifest.dependencies ?? {}).toEqual({});
   });
+
+  it("runs the documented library lifecycle @claim:library-api", () => {
+    const captioner = createCaptioner();
+    const listener = vi.fn();
+    const unsubscribe = captioner.subscribe(listener);
+    captioner.register(state);
+    expect(captioner.activate("bridge-out").stateId).toBe("bridge-out");
+    expect(captioner.setLocale("es-MX").resolvedLocale).toBe("es");
+    expect(captioner.moveFocus("next").activeCue?.id).toBe("rope");
+    expect(captioner.getSnapshot().activeCue?.id).toBe("rope");
+    expect(listener).toHaveBeenCalled();
+    unsubscribe();
+    captioner.destroy();
+    expect(() => captioner.register(state)).toThrow(/destroyed/);
+  });
+
+  it("validates tags and speaks action fallback in its resolved language @claim:language-tags-and-fallback", () => {
+    expect(() => createCaptioner({ locale: "not_a_locale" })).toThrow(CaptionerValidationError);
+    const speak = vi.fn();
+    class FakeUtterance {
+      lang = "";
+      voice: SpeechSynthesisVoice | null = null;
+      constructor(readonly text: string) {}
+    }
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    vi.stubGlobal("window", { speechSynthesis: { cancel: vi.fn(), getVoices: () => [], speak } });
+    try {
+      const captioner = createCaptioner({
+        locale: "es-MX", fallbackLocale: "en",
+        states: [{ id: "gate", name: "Gate", descriptions: { es: "La puerta está cerrada." }, focusOrder: [{ id: "lever", labels: { en: "Lever" }, descriptions: { en: "Press E." } }] }]
+      });
+      captioner.activate("gate");
+      expect(captioner.moveFocus("next").activeCue?.resolvedLocale).toBe("en");
+      expect(captioner.speak()).toBe(true);
+      expect(speak).toHaveBeenCalledWith(expect.objectContaining({ lang: "en" }));
+      captioner.destroy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("adds a polite announcement only when mounting asks for one @claim:mounted-announcement", () => {
+    class FakeRegion {
+      dataset: Record<string, string> = {};
+      style: Record<string, string> = {};
+      className = "";
+      lang = "";
+      textContent = "";
+      attributes = new Map<string, string>();
+      parent: FakeHost | null = null;
+      setAttribute(name: string, value: string): void { this.attributes.set(name, value); }
+      remove(): void { this.parent?.regions.delete(this); }
+    }
+    class FakeHost {
+      readonly regions = new Set<FakeRegion>();
+      readonly ownerDocument = { createElement: () => new FakeRegion() };
+      insertAdjacentElement(_where: InsertPosition, region: Element): void {
+        const managed = region as unknown as FakeRegion;
+        managed.parent = this;
+        this.regions.add(managed);
+      }
+    }
+    vi.stubGlobal("Element", FakeHost);
+    try {
+      const captioner = createCaptioner();
+      const announced = new FakeHost();
+      const silent = new FakeHost();
+      captioner.mount(announced as unknown as Element);
+      captioner.mount(silent as unknown as Element, { liveRegion: false });
+      expect(announced.regions.size).toBe(0);
+      expect(silent.regions.size).toBe(0);
+      // Mounting a second host replaces the first managed region. Re-mount the
+      // announced host to assert the region's observable accessibility role.
+      captioner.mount(announced as unknown as Element);
+      const region = [...announced.regions][0];
+      expect(region?.attributes.get("role")).toBe("status");
+      expect(region?.attributes.get("aria-live")).toBe("polite");
+      captioner.destroy();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });

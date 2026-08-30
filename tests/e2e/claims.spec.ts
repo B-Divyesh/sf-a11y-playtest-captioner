@@ -99,6 +99,16 @@ test("lets a visitor author localized captions and rehearse action order @claim:
   await expect(page.locator("#active-cue")).toContainText("Anchor post");
 });
 
+test("saves an ordinary draft in this browser @claim:browser-storage", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Add first state" }).click();
+  await page.getByLabel("State name").fill("Stored gate");
+  await page.reload();
+  await expect(page.getByText("Stored gate", { exact: true }).first()).toBeVisible();
+  const stored = await page.evaluate((key) => localStorage.getItem(key), REAL_STORAGE_KEY);
+  expect(stored).toContain("Stored gate");
+});
+
 test("exports the demo project as JSON @claim:json-export", async ({ page }) => {
   await openDemo(page);
   const downloadPromise = page.waitForEvent("download");

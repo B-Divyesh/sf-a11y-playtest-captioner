@@ -48,6 +48,7 @@ img, svg { display: block; max-width: 100%; }
 
 .skip-link { position: fixed; z-index: 100; top: 8px; left: 8px; padding: 12px 16px; color: var(--cyan-ink); background: var(--cyan); border-radius: 8px; transform: translateY(-160%); }
 .skip-link:focus { transform: translateY(0); }
+.screen-reader-text { position: fixed; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; box-shadow: 0 0 0 2px var(--night); }
 
 .site-header { width: min(1440px, calc(100% - 48px)); min-height: 80px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
@@ -266,10 +267,14 @@ footer nav { justify-content: end; }
   .brand { font-size: 14px; }
   .brand svg { width: 28px; }
   .site-header nav { display: none; }
-  .hero { width: calc(100% - 32px); min-height: auto; padding: 56px 0 76px; }
-  h1 { font-size: clamp(2.9rem, 15vw, 4rem); }
+  .hero { width: calc(100% - 32px); min-height: auto; padding: 22px 0 28px; gap: 32px; }
+  .hero .eyebrow { margin-bottom: 8px; font-size: 11px; }
+  h1 { margin-bottom: 12px; font-size: clamp(2.35rem, 11.5vw, 3rem); line-height: 1; }
+  .lede { margin-bottom: 16px; font-size: 16px; line-height: 1.35; }
   .hero-actions { display: grid; }
+  .hero-actions .quiet { display: none; }
   .action-note { max-width: none; }
+  .hero-facts { gap: 3px; margin-top: 14px; font-size: 13px; line-height: 1.2; }
   .demo-banner { bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100% - 32px); align-items: stretch; flex-direction: column; padding: 14px; }
   .demo-banner div { display: grid; grid-template-columns: 1fr 1fr; }
   .hero-art { border-radius: 16px; }

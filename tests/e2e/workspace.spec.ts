@@ -134,7 +134,7 @@ test("keeps natural Tab order through state authoring after immediate saves", as
   await page.keyboard.press("Tab");
   await expect(page.getByLabel("Language tag")).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Add", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Add language", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByLabel(/State description/)).toBeFocused();
   await page.keyboard.press("Tab");
@@ -204,7 +204,7 @@ test("recovers from an invalid language tag and adds the corrected locale", asyn
   const language = page.getByLabel("Language tag");
 
   await language.fill("!!");
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Add language", exact: true }).click();
   await expect(language).toHaveJSProperty("validationMessage", "Enter a valid BCP 47 language tag, such as fr or pt-BR.");
   expect(await language.evaluate((input) => (input as HTMLInputElement).validity.valid)).toBe(false);
 
@@ -214,7 +214,7 @@ test("recovers from an invalid language tag and adds the corrected locale", asyn
   await language.press("ControlOrMeta+A");
   await language.pressSequentially("es-MX");
   expect(await language.evaluate((input) => (input as HTMLInputElement).validity.valid)).toBe(true);
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await page.getByRole("button", { name: "Add language", exact: true }).click();
 
   await expect(page.getByRole("button", { name: "es-MX" })).toBeVisible();
   await expect(page.getByLabel(/State description/)).toHaveAccessibleName(/State description es-MX/);
@@ -238,6 +238,32 @@ test("keeps Add action at least 44px tall on desktop and mobile", async ({ page 
   const box = await page.getByRole("button", { name: "Add action" }).boundingBox();
   if (!box) throw new Error("Add action was not measurable.");
   expect(box.height).toBeGreaterThanOrEqual(44);
+});
+
+test("keeps all three first-screen facts visible at 390px", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Mobile first-screen assertion");
+  const factTexts = [
+    "Private: sample data never changes your real draft.",
+    "Offline: works after the first visit.",
+    "Free: no account or payment."
+  ];
+  for (const text of factTexts) {
+    const box = await page.getByText(text, { exact: true }).boundingBox();
+    if (!box) throw new Error(`Could not measure first-screen fact: ${text}`);
+    expect(box.y + box.height, text).toBeLessThanOrEqual(844);
+  }
+});
+
+test("moves focus and announces the destination on document route changes", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "One desktop history regression is sufficient");
+  await page.getByRole("link", { name: "Privacy", exact: true }).first().click();
+  await expect(page).toHaveURL(/\/privacy\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeFocused();
+  await expect(page.locator("#route-announcement")).toContainText("Opened Privacy — A11y Playtest Captioner");
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Caption game states before playtests" })).toBeFocused();
+  await expect(page.locator("#route-announcement")).toContainText("Opened A11y Playtest Captioner — game-state captions");
 });
 
 test("has no axe accessibility violations", async ({ page }) => {

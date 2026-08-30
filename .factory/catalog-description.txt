@@ -1,0 +1,1 @@
+Caption game states and test action order before accessible playtests.

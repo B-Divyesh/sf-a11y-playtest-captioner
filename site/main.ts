@@ -1,6 +1,7 @@
 import "./styles.css";
 import { createCaptioner, CaptionerValidationError } from "../src/index";
 import { emptyProject, sampleProject, type EditableCue, type EditableState, type Project } from "./sample";
+import { establishRouteContext } from "./route-context";
 
 const REAL_STORAGE_KEY = "a11y-playtest-captioner:project:v1";
 const DEMO_STORAGE_KEY = "demo:a11y-playtest-captioner:project:v1";
@@ -29,6 +30,8 @@ if (isDemo) {
   document.querySelector<HTMLMetaElement>("meta[name='description']")?.setAttribute("content", "Try the isolated sample workspace for browser-game caption authoring.");
   document.getElementById("demo-banner")?.removeAttribute("hidden");
 }
+
+establishRouteContext();
 
 function required<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
@@ -202,7 +205,7 @@ function renderAuthor(): void {
         <form id="add-language-form" class="add-language-form">
           <label for="new-language">Language tag</label>
           <input id="new-language" name="language" placeholder="fr-CA" size="6" autocomplete="off" spellcheck="false" />
-          <button type="submit">Add</button>
+          <button type="submit">Add language</button>
         </form>
       </div>
       <label class="description-field">State description <span>${esc(selectedLocale)}</span>
