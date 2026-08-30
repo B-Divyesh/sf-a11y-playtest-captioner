@@ -98,20 +98,34 @@ function save(message = "Saved locally"): void {
   }
 }
 
-function showToast(message: string, action?: { label: string; run: () => void }): void {
+type ToastAction = {
+  label: string;
+  run: () => void;
+  dismissFocus?: () => HTMLElement | null;
+};
+
+function showToast(message: string, action?: ToastAction): HTMLButtonElement | null {
   window.clearTimeout(toastTimer);
   undoAction = action?.run ?? null;
   toast.innerHTML = `${esc(message)}${action ? ` <button type="button" id="toast-action">${esc(action.label)}</button>` : ""}`;
   toast.hidden = false;
-  if (action) required<HTMLButtonElement>("toast-action").addEventListener("click", () => {
-    undoAction?.();
-    undoAction = null;
-    toast.hidden = true;
-  });
+  const actionButton = action ? required<HTMLButtonElement>("toast-action") : null;
+  if (actionButton && action) {
+    actionButton.addEventListener("click", () => {
+      undoAction?.();
+      undoAction = null;
+      const nextFocus = toast.contains(document.activeElement) ? action.dismissFocus?.() : null;
+      toast.hidden = true;
+      nextFocus?.focus();
+    });
+  }
   toastTimer = window.setTimeout(() => {
+    const nextFocus = toast.contains(document.activeElement) ? action?.dismissFocus?.() : null;
     toast.hidden = true;
     undoAction = null;
+    nextFocus?.focus();
   }, action ? 8000 : 5000);
+  return actionButton;
 }
 
 function render(): void {
@@ -133,6 +147,22 @@ function renderStateList(): void {
       <span><strong>${esc(state.name)}</strong><small>${esc(state.id)}</small></span>
       ${state.id === selectedId ? '<em>Active</em>' : ""}
     </button>`).join("");
+}
+
+function stateButton(stateId: string | null): HTMLButtonElement | null {
+  if (!stateId) return null;
+  return [...stateList.querySelectorAll<HTMLButtonElement>("[data-select-state]")]
+    .find((button) => button.dataset.selectState === stateId) ?? null;
+}
+
+function localeButton(locale: string): HTMLButtonElement | null {
+  return [...document.querySelectorAll<HTMLButtonElement>("[data-locale]")]
+    .find((button) => button.dataset.locale === locale) ?? null;
+}
+
+function cueItem(cueId: string): HTMLElement | null {
+  return [...document.querySelectorAll<HTMLElement>("[data-cue-id]")]
+    .find((item) => item.dataset.cueId === cueId) ?? null;
 }
 
 function renderAuthor(): void {
@@ -179,7 +209,7 @@ function renderAuthor(): void {
 }
 
 function cueEditor(cue: EditableCue, index: number, total: number): string {
-  return `<li class="cue-item" data-cue-index="${index}">
+  return `<li class="cue-item" data-cue-index="${index}" data-cue-id="${esc(cue.id)}">
     <div class="cue-order"><span>${String(index + 1).padStart(2, "0")}</span><div>
       <button type="button" data-cue-move="up" aria-label="Move ${esc(cue.labels[selectedLocale] || cue.id)} earlier" ${index === 0 ? "disabled" : ""}>↑</button>
       <button type="button" data-cue-move="down" aria-label="Move ${esc(cue.labels[selectedLocale] || cue.id)} later" ${index === total - 1 ? "disabled" : ""}>↓</button>
@@ -241,11 +271,13 @@ function bindWorkspace(): void {
     selectedLocale = state ? Object.keys(state.descriptions)[0] ?? project.defaultLocale : project.defaultLocale;
     cueIndex = -1;
     render();
+    stateButton(selectedId)?.focus();
   }));
   document.querySelectorAll<HTMLButtonElement>("[data-locale]").forEach((button) => button.addEventListener("click", () => {
     selectedLocale = button.dataset.locale ?? project.defaultLocale;
     cueIndex = -1;
     render();
+    localeButton(selectedLocale)?.focus();
   }));
   const state = currentState();
   if (!state) return;
@@ -389,7 +421,10 @@ function moveCue(state: EditableState, index: number, offset: number): void {
   cueIndex = target;
   save("Focus order updated");
   render();
-  document.querySelector<HTMLElement>(`[data-cue-index="${target}"]`)?.focus();
+  const movedItem = cueItem(cue.id);
+  const sameDirection = movedItem?.querySelector<HTMLButtonElement>(`[data-cue-move="${offset > 0 ? "down" : "up"}"]`);
+  const reverseDirection = movedItem?.querySelector<HTMLButtonElement>(`[data-cue-move="${offset > 0 ? "up" : "down"}"]`);
+  (sameDirection && !sameDirection.disabled ? sameDirection : reverseDirection)?.focus();
 }
 
 function removeCue(state: EditableState, index: number): void {
@@ -398,14 +433,20 @@ function removeCue(state: EditableState, index: number): void {
   cueIndex = Math.min(cueIndex, state.focusOrder.length - 1);
   save("Action removed");
   render();
+  const focusAfterRemoval = (): HTMLElement | null => {
+    const remaining = document.querySelectorAll<HTMLButtonElement>("[data-cue-remove]");
+    return remaining[Math.min(index, remaining.length - 1)] ?? document.getElementById("add-cue");
+  };
   showToast(`Removed “${removed.labels[selectedLocale] || removed.id}”.`, {
     label: "Undo",
     run: () => {
       state.focusOrder.splice(index, 0, removed);
       save("Action restored");
       render();
-    }
-  });
+      cueItem(removed.id)?.querySelector<HTMLButtonElement>("[data-cue-remove]")?.focus();
+    },
+    dismissFocus: focusAfterRemoval
+  })?.focus();
 }
 
 function deleteState(state: EditableState): void {
@@ -415,6 +456,7 @@ function deleteState(state: EditableState): void {
   cueIndex = -1;
   save("State removed");
   render();
+  const focusAfterDeletion = (): HTMLElement | null => stateButton(selectedId) ?? document.getElementById("add-state");
   showToast(`Deleted “${state.name}”.`, {
     label: "Undo",
     run: () => {
@@ -422,8 +464,10 @@ function deleteState(state: EditableState): void {
       selectedId = state.id;
       save("State restored");
       render();
-    }
-  });
+      document.getElementById("delete-state")?.focus();
+    },
+    dismissFocus: focusAfterDeletion
+  })?.focus();
 }
 
 function bindReview(state: EditableState): void {
@@ -432,15 +476,16 @@ function bindReview(state: EditableState): void {
     selectedLocale = (event.target as HTMLSelectElement).value;
     cueIndex = -1;
     render();
+    document.getElementById("review-language")?.focus();
   });
-  required<HTMLButtonElement>("previous-cue").addEventListener("click", () => stepCue(state, "previous"));
-  required<HTMLButtonElement>("next-cue").addEventListener("click", () => stepCue(state, "next"));
+  required<HTMLButtonElement>("previous-cue").addEventListener("click", () => stepCue(state, "previous", "previous-cue"));
+  required<HTMLButtonElement>("next-cue").addEventListener("click", () => stepCue(state, "next", "next-cue"));
   required<HTMLButtonElement>("speak-preview").addEventListener("click", () => speakPreview(state));
   monitor?.addEventListener("keydown", (event) => {
     const key = (event as KeyboardEvent).key;
     if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(key)) {
       event.preventDefault();
-      stepCue(state, key === "ArrowLeft" ? "previous" : key === "Home" ? "first" : key === "End" ? "last" : "next", true);
+      stepCue(state, key === "ArrowLeft" ? "previous" : key === "Home" ? "first" : key === "End" ? "last" : "next", "caption-monitor");
     } else if (key.toLowerCase() === "s") {
       event.preventDefault();
       speakPreview(state);
@@ -448,7 +493,7 @@ function bindReview(state: EditableState): void {
   });
 }
 
-function stepCue(state: EditableState, direction: "next" | "previous" | "first" | "last", restoreFocus = false): void {
+function stepCue(state: EditableState, direction: "next" | "previous" | "first" | "last", focusId?: string): void {
   const total = state.focusOrder.length;
   if (!total) return;
   if (direction === "first") cueIndex = 0;
@@ -456,7 +501,7 @@ function stepCue(state: EditableState, direction: "next" | "previous" | "first" 
   else if (direction === "next") cueIndex = (cueIndex + 1 + total) % total;
   else cueIndex = (cueIndex - 1 + total) % total;
   renderReviewOnly();
-  if (restoreFocus) document.getElementById("caption-monitor")?.focus();
+  if (focusId) document.getElementById(focusId)?.focus();
 }
 
 function speakPreview(state: EditableState): void {
@@ -497,7 +542,9 @@ function replaceProject(next: Project, message: string): void {
       selectedLocale = project.defaultLocale;
       save("Previous project restored");
       render();
-    }
+      stateButton(selectedId)?.focus();
+    },
+    dismissFocus: () => stateButton(selectedId) ?? document.getElementById("add-state")
   });
 }
 

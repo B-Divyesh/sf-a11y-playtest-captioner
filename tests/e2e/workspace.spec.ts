@@ -131,6 +131,59 @@ test("keeps natural Tab order through state authoring after immediate saves", as
   await expect(page.getByText("Gate warning", { exact: true }).first()).toBeVisible();
 });
 
+test("preserves focus across every render-replacing keyboard action", async ({ page }) => {
+  await page.getByRole("button", { name: "Load example project" }).click();
+
+  const watcher = page.locator("[data-select-state='watcher-alert']");
+  await watcher.focus();
+  await watcher.press("Enter");
+  await expect(page.locator("[data-select-state='watcher-alert']")).toBeFocused();
+
+  const spanish = page.getByRole("button", { name: "es", exact: true });
+  await spanish.focus();
+  await spanish.press("Enter");
+  await expect(page.getByRole("button", { name: "es", exact: true })).toBeFocused();
+
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const moveLater = page.getByRole("button", { name: "Move Loose rope later" });
+  await moveLater.focus();
+  await moveLater.press("Enter");
+  await expect(page.getByRole("button", { name: "Move Loose rope earlier" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const remove = page.getByRole("button", { name: "Remove Loose rope" });
+  await remove.focus();
+  await remove.press("Enter");
+  await expect(page.getByRole("button", { name: "Undo" })).toBeFocused();
+  await page.getByRole("button", { name: "Undo" }).press("Enter");
+  await expect(page.getByRole("button", { name: "Remove Loose rope" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const deleteState = page.getByRole("button", { name: "Delete “Ravine crossing”" });
+  await deleteState.focus();
+  await deleteState.press("Enter");
+  await expect(page.getByRole("button", { name: "Undo" })).toBeFocused();
+  await page.getByRole("button", { name: "Undo" }).press("Enter");
+  await expect(page.getByRole("button", { name: "Delete “Ravine crossing”" })).toBeFocused();
+
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const next = page.getByRole("button", { name: "Next action" });
+  await next.focus();
+  await next.press("Enter");
+  await expect(page.getByRole("button", { name: "Next action" })).toBeFocused();
+
+  const previous = page.getByRole("button", { name: "Previous action" });
+  await previous.focus();
+  await previous.press("Enter");
+  await expect(page.getByRole("button", { name: "Previous action" })).toBeFocused();
+
+  const voiceLanguage = page.getByLabel("Voice language");
+  await voiceLanguage.focus();
+  await voiceLanguage.press("ArrowDown");
+  await expect(page.getByLabel("Voice language")).toBeFocused();
+  await expect(page.getByLabel("Voice language")).toHaveValue("es");
+});
+
 test("recovers from an invalid language tag and adds the corrected locale", async ({ page }) => {
   await page.getByRole("button", { name: "Add first state" }).click();
   const language = page.getByLabel("Language tag");
@@ -165,10 +218,10 @@ test("loads, exports, and restores the example project", async ({ page }) => {
   await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
 });
 
-test("has no serious accessibility violations", async ({ page }) => {
+test("has no axe accessibility violations", async ({ page }) => {
+  await page.getByRole("button", { name: "Load example project" }).click();
   const results = await new AxeBuilder({ page: page as never }).analyze();
-  const serious = results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact ?? ""));
-  expect(serious).toEqual([]);
+  expect(results.violations).toEqual([]);
 });
 
 test("reopens the workspace offline after the first visit", async ({ page, context }) => {
@@ -234,4 +287,17 @@ test("keeps mobile action controls and adjacent targets touch sized", async ({ p
     return second.left - first.right;
   });
   expect(gap).toBeGreaterThanOrEqual(8);
+});
+
+test("keeps every mobile header and footer link touch sized", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "mobile", "Mobile-specific touch-target assertion");
+  const measurements = await page.locator(".site-header .brand, footer .brand, footer nav a").evaluateAll((links) => links.map((link) => {
+    const box = link.getBoundingClientRect();
+    return { label: link.textContent?.trim(), width: box.width, height: box.height };
+  }));
+  expect(measurements).toHaveLength(5);
+  for (const measurement of measurements) {
+    expect(measurement.width, measurement.label).toBeGreaterThanOrEqual(44);
+    expect(measurement.height, measurement.label).toBeGreaterThanOrEqual(44);
+  }
 });

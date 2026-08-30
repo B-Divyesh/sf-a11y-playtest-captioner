@@ -35,11 +35,11 @@ img, svg { display: block; max-width: 100%; }
 :focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; box-shadow: 0 0 0 2px var(--night); }
 
 .site-header { width: min(1440px, calc(100% - 48px)); min-height: 80px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-size: 16px; text-decoration: none; letter-spacing: -.01em; }
+.brand { min-height: 44px; display: inline-flex; align-items: center; gap: 10px; font-size: 16px; text-decoration: none; letter-spacing: -.01em; }
 .brand svg { width: 32px; height: 32px; fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .brand strong { color: var(--cyan); font-weight: 700; }
 .site-header nav, footer nav { display: flex; align-items: center; gap: 28px; }
-.site-header nav a, footer nav a { color: var(--muted); text-underline-offset: 5px; text-decoration-color: transparent; transition: color 180ms ease, text-decoration-color 180ms ease; }
+.site-header nav a, footer nav a { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); text-underline-offset: 5px; text-decoration-color: transparent; transition: color 180ms ease, text-decoration-color 180ms ease; }
 .site-header nav a:hover, footer nav a:hover { color: var(--text); text-decoration-color: var(--cyan); }
 
 main { overflow: hidden; }
