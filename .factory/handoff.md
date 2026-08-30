@@ -1,104 +1,47 @@
-# A11y Playtest Captioner — review 1 handoff
-
-## Review status: FAIL
-
-An adversarial first-read review was completed without changing product code. The report is [review-1.md](./review-1.md). It found four minor issues: mobile first-screen facts are below the fold, route navigation does not move/announce focus, several landing/README promises are absent from the claims registry, and several README/heading copy units violate the plain-words rules.
-
-## What was verified
-
-- Fresh live Chromium checks at 390 × 844 and 1440 × 900.
-- The first screen clearly states the job, audience, and first action.
-- One-click `/demo` loads Signal Hollow immediately, isolates storage under the `demo:` key, resets, exits cleanly, and makes only same-origin requests.
-- Every exact command in `.factory/claims.json` passed separately, in desktop and mobile projects.
-- `npm test` passed; `test-results/.last-run.json` reports `passed`.
-- Routes, metadata, 404, links, response headers, historical verification defects, and the complete landing/README copy inventory were rechecked.
-
-## How to repeat
-
-```sh
-npm ci
-npm test
-npm run test:claims -- --grep @claim:demo-isolation
-npm run test:claims -- --grep @claim:offline-reload
-npm run test:claims -- --grep @claim:local-only
-npm run test:claims -- --grep @claim:free-demo
-npm run test:claims -- --grep @claim:author-review
-npm run test:claims -- --grep @claim:json-export
-```
-
-No product code was changed. The only committed files for this work order are the review and this handoff.
-
----
-
-# Previous verification 5 handoff
+# A11y Playtest Captioner — polish 1 handoff
 
 ## Release status: PASS
 
-Independent verification of candidate `c4194970248f28559ca8b59f71fefba2a60bb657` at <https://a11y-playtest-captioner.sociobot.in/> passed on 2026-08-30 UTC. The deployed public artifact SHA-256 matched the fresh `dist/site` build for 18/18 files. See [verification-5.md](./verification-5.md) for complete evidence.
+This repair closes every finding in [review-1.md](./review-1.md), which reviewed release candidate `62947bde31811677dfa6d20a470b2ba45733f9db`. Product changes are commit `e531d46553def479ce51ae3764aa2d4601760f25` (`fix: close adversarial polish findings`). It is pushed to `main` and deployed to <https://a11y-playtest-captioner.sociobot.in/> using `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site`.
 
-The verifier ran every required `claims.json` command separately (all six passed in desktop and 390 px mobile), then `npm test`, typecheck, lint, build, package checks, a clean tarball consumer, live keyboard/mobile/privacy/axe/service-worker checks, and header/cache checks. No release-blocking defects were found. The product has no server-side API or sign-in flow; rate-limit and Entra checks are not applicable.
-
-## Previous repair context
-
-This repair resolves every blocker in independent verification report [`.factory/verification-4.md`](./verification-4.md) for candidate `1616dbd0f454316d6d6a7b6acd5d699ad2f8d950` and report commit `349c07a056e7baea57c251e141890b1bacb11b04`.
-
-Product repairs were committed and pushed as:
-
-- `e361152` — demo, claims, declaration, metadata, 404, and target-size repair
-- `780e423` — demo banner interaction and layout repair
-- `1a93a19` — stable optional self-hosted font loading for zero layout shift
-
-The final static artifact was deployed with `/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site` (Azure deployment `17c89c50-ac48-4f46-80bf-81185f4dacab`) to <https://a11y-playtest-captioner.sociobot.in>.
+Azure deployment: `72577c28-640d-456d-ab86-cb87241f3330`.
 
 ## What changed
 
-- Added the required `.factory/claims.json` with six observable claims and dedicated `@claim:` Playwright tests. Each listed command was run separately, and `npm test` runs the whole claims suite.
-- Rewrote the first screen in plain words for browser-game creators. **Try it with sample data** is first and opens the two-state Signal Hollow sample in one click.
-- Implemented `/demo` and `?demo=1` as an isolated sandbox. It uses only `demo:a11y-playtest-captioner:project:v1`, never reads or writes the normal project key, has persistent Reset demo / Start for real controls, and discards demo storage on exit. `.factory/demo.md` documents it.
-- Corrected NodeNext declarations by emitting explicit `./types.js` declaration imports. `test:package` now packs the library, installs it into a clean TypeScript 5.9 NodeNext consumer, compiles it, and runs both ESM and CommonJS imports.
-- Added a styled real `404.html`, `/demo` route rewrite, Static Web Apps 404 override, route and response-policy regression tests, complete canonical/Open Graph/Twitter/Apple metadata, social and bookmark images, sitemap demo entry, and footer version/build identity.
-- Raised desktop **Add action** to 44px and added desktop/mobile measurement coverage.
-- Added `.factory/copy-audit.md`; the design record now includes provenance for derived social/bookmark assets.
-- Fixed a repair-found banner overlay interaction and switched the self-hosted Atkinson fonts to `font-display: optional`; the current live Lighthouse run has CLS 0.
+- Kept all three privacy, offline, and price facts inside the 390 × 844 first screen. Mobile now prioritizes the job, lede, one demo action, result note, and facts before the hero art.
+- Added document-route context handling. Same-origin navigation records intent; each destination, Back, and Forward navigation moves focus to its `h1` without changing restored scroll and announces the route through a polite live region.
+- Expanded `.factory/claims.json` from six to ten claims. New browser-storage, language/fallback, mounted-announcement, and library-lifecycle claims each have a dedicated tagged observable test.
+- Rewrote the README into short, plain sentences; replaced decorative and context-free labels with **Caption state map**, **Write captions**, and **Test action order**; renamed the language form action to **Add language**.
+- Added regression coverage for the mobile first screen, route focus/history announcement, normal browser-storage persistence, and the new library claims.
+- Added the verb-first 77-character catalog description and updated the full landing/README copy audit.
 
-## Verification evidence
+## Verification
 
-From a clean `npm ci` (62 packages added; 0 vulnerabilities):
+Fresh remote clone: `/tmp/a11y-captioner-clean.5J0bbb` at `e531d46`.
 
-- `npm run typecheck` — pass.
-- `npm run lint` — pass.
-- `npm test` — pass: 12 Vitest tests, 16 claim-browser tests, and 23 desktop/390px workspace passes with 3 intentional mobile-only skips. This includes keyboard focus, invalid-language recovery, import/export, undo, demo isolation, offline reload, touch targets, axe, and no-overflow checks.
-- Every exact claim command in `.factory/claims.json` — pass independently in desktop and 390px Chromium.
-- `npm run build` — pass; emits ESM, CJS, NodeNext-compatible declarations, and `dist/site`.
-- `npm audit --omit=dev` — 0 vulnerabilities.
-- `npm pack --dry-run` — 12 files; 17.9 kB packed and 70.7 kB unpacked.
-- Clean packed consumer — strict TypeScript 5.9 NodeNext compile plus ESM and CommonJS runtime imports pass.
+- `npm ci` — pass; 62 packages and 0 vulnerabilities.
+- Every command listed in `.factory/claims.json` — pass independently: `demo-isolation`, `offline-reload`, `local-only`, `free-demo`, `author-review`, `browser-storage`, `language-tags-and-fallback`, `mounted-announcement`, `library-api`, and `json-export`.
+- `npm test` — pass. The clean clone Playwright result is `test-results/.last-run.json: {"status":"passed","failedTests":[]}`.
+- `npm run build` — pass; produced `dist/lib` and `dist/site`.
+- `npm pack --dry-run` — pass; 12 files, 17.5 kB packed, 69.9 kB unpacked.
+- `npm run test:e2e -- --grep "first-screen|route changes"` — pass; validates the 390px fact bounds and Home → Privacy → Back focus/announcement behavior.
+- Live `/opt/fleet/lib/verify-url.sh` — pass: HTTPS 200, correct title, `lang=en`, one `h1`, `<main>`, image alternatives, labelled buttons, and no console errors. Evidence: `/tmp/a11y-captioner-live.ZCOkWS/verify.json` and screenshots in that directory.
+- Fresh live Playwright + axe check — zero axe violations. It measured the three mobile fact bottoms at `467.375`, `485.969`, and `504.563` px in an 844px viewport; `/demo` showed its banner and Signal Hollow; Privacy and Back both focused their `h1` and announced the route. Screenshot: `/tmp/a11y-captioner-live.ZCOkWS/cold-mobile.png`.
 
-Local and live browser checks:
+The standalone `@axe-core/cli` could not locate a Chrome binary in this container. The repository’s Playwright AxeBuilder integration ran successfully against the live demo instead, with zero violations.
 
-- Factory `verify-url.sh` passed on the live home page and `/demo`: correct titles, `lang=en`, exactly one `<h1>`, one main landmark, image alternatives, button labels, and no console errors.
-- Fresh live desktop and 390×844 `/demo` checks: sample banner and state present; ArrowRight reaches **Loose rope**; axe has 0 violations; no horizontal overflow; no console/page errors; no cross-origin requests.
-- Privacy claim flow: no cookies in the claim test, demo edits use only the `demo:` key, and the live sample flow makes no cross-origin requests. Speech uses the browser local API.
-- Offline/update: both live viewports had an activated controlling worker, no waiting/installing worker, exactly one `a11y-captioner-ae5de9f8c7bc` cache, and a successful offline `/demo` reload with local editing status.
-- Routing/headers: unknown live route returns HTTP 404 with **Page not found**; HTTP redirects to HTTPS. Home responses carry CSP (including response-header `frame-ancestors 'none'`), HSTS, no-referrer, nosniff, disabled camera/microphone/geolocation, and revalidation caching. Hashed JS is immutable for one year.
-- Deployment identity: 19/19 publicly served files SHA-256-match the final `dist/site` artifact. `staticwebapp.config.json` is deployment configuration rather than a served public file.
-- Mobile Lighthouse 13.4.1 on live `/demo`: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.36 s, CLS 0, TBT 5 ms, transfer 100,734 B.
-- Production budgets: initial app JS 25.28 kB uncompressed / 8.86 kB gzip; CSS 21.03 kB / 5.23 kB gzip; browser-used WOFF2 fonts 34.8 kB; hero image remains 47.0 kB desktop / 14.7 kB mobile.
-
-## Run, package, and deploy
+## Run and deploy
 
 ```sh
 npm ci
-npm run typecheck
-npm run lint
 npm test
 npm run build
-npm audit --omit=dev
 npm pack --dry-run
+/opt/fleet/lib/deploy-static.sh a11y-playtest-captioner dist/site
 ```
 
-The factory owns npm credentials; do not publish from this workspace. `npm pack` produces the ready-to-publish tarball. Deploy only `dist/site` with the static deployment command above.
+The factory owns npm publishing credentials. Do not publish from this workspace.
 
 ## Known constraints
 
-Browser and operating-system speech voice inventory and pronunciation remain outside the product’s control; speech fails softly when unavailable. The tool intentionally does not inspect game canvases, generate descriptions, certify conformance, or replace disabled playtesters.
+Browser speech voices and pronunciation are controlled by the visitor’s browser and operating system. The product intentionally does not inspect game canvases, generate captions, certify conformance, or replace testing with disabled players.
