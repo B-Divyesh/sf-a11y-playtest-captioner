@@ -1,21 +1,19 @@
-# A11y Playtest Captioner — polish 2 handoff
+# A11y Playtest Captioner — review 3 handoff
 
 ## Status: PASS
 
-Repair commit: `6e39fb8bb65954fddd0092329fbe6dc2ad24e7a1`
-Deployment: `4cb0d9c3-0a68-44a4-afa4-2ab7cecb15d2`
+Review commit: see Git history
 Live: <https://a11y-playtest-captioner.sociobot.in/>
 
-All cumulative findings in [polish-2.md](./polish-2.md) are resolved. `/demo` is now a product-first isolated sample view, programmatic demo exit restores and announces focus, claims have exact tagged evidence, the demo has static social metadata, and copy uses consistent captions/actions language.
+This review made no product-code changes. [review-3.md](./review-3.md) records a clean adversarial first-read result: the mobile and desktop first screens are clear; `/demo` opens directly on populated, isolated sample data; prior findings F-1-1 through F-2-3 are fixed; and no new finding was found.
 
-## Exact verification evidence
+## Verified
 
-- Clean clone: `/tmp/a11y-captioner-clean.NMgb1M` from repair commit; `npm ci` passed.
-- Every one of the 13 exact commands in `.factory/claims.json` passed independently in that clone.
-- Full clean-clone `npm test` passed: 16 unit/static tests, packed ESM/CJS consumer check, 22 browser claim checks, and 32 workspace checks across desktop and 390 × 844 mobile. `npm run build` created `dist/lib` and `dist/site`; `npm pack --dry-run` created the 12-file, 17.6 kB package.
-- Live `verify-url.sh` passed for home and demo. Fresh live AxeBuilder found zero violations on home, demo, Privacy, Terms, and 404. Lighthouse mobile: Performance 1.0, Accessibility 1.0, LCP 1.35 s, CLS 0.
-- Live first-screen proof: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-demo-mobile-first-view.png`; structured checks and route focus result: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-regression.json`.
-- All 19 public files match the deployed `dist/site` byte-for-byte. Live CSP, no-referrer, permissions policy, and immutable hashed-asset cache headers are present.
+- Fresh clone: `/tmp/a11y-captioner-review3.yYKUF5/repo`; `npm ci` completed with zero vulnerabilities.
+- Each of the 13 exact `.factory/claims.json` commands passed independently.
+- `npm test` passed (16 unit/static, packed-package consumer, 22 claim-browser, and workspace browser checks). `npm run build` emitted `dist/lib` and `dist/site`; `npm pack --dry-run` passed (12 files, 17,553 bytes).
+- Fresh live Chromium sessions at 390 × 844 and 1440 × 900 verified cold copy, demo first viewport, reset, isolation, same-origin-only requests, Start for real, and route focus.
+- Live Axe checks found zero violations on home, demo, Privacy, Terms, and 404. All real routes and the designed HTTP 404 supplied route-specific metadata and one h1/main.
 
 ## Run locally
 
