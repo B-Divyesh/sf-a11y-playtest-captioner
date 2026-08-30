@@ -43,7 +43,8 @@ img, svg { display: block; max-width: 100%; }
 .site-header nav a:hover, footer nav a:hover { color: var(--text); text-decoration-color: var(--cyan); }
 
 main { overflow: hidden; }
-.demo-banner { width: min(1440px, calc(100% - 48px)); min-height: 56px; margin: 14px auto -24px; padding: 8px 10px 8px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid rgba(201, 242, 123, .64); border-radius: 12px; color: var(--text); background: #102334; }
+.demo-banner { position: fixed; z-index: 60; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); width: min(920px, calc(100% - 48px)); min-height: 56px; margin: 0; padding: 8px 10px 8px 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid rgba(201, 242, 123, .64); border-radius: 12px; color: var(--text); background: rgba(16, 35, 52, .97); box-shadow: var(--shadow); transform: translateX(-50%); }
+.demo-banner[hidden] { display: none; }
 .demo-banner p { margin: 0; color: var(--muted); }
 .demo-banner strong { color: var(--lime); }
 .demo-banner div { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -184,6 +185,7 @@ kbd { padding: 2px 5px; border: 1px solid currentColor; border-radius: 4px; font
 .project-actions { display: flex; gap: 10px; }
 #import-file { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
 .toast { position: fixed; z-index: 50; right: 24px; bottom: 24px; max-width: min(440px, calc(100vw - 48px)); padding: 14px 16px; border: 1px solid var(--cyan); border-radius: 10px; color: var(--text); background: #10283a; box-shadow: var(--shadow); }
+.demo-mode .toast { bottom: 96px; }
 .toast button { min-height: 44px; margin-left: 10px; border: 0; border-radius: 6px; color: var(--cyan); background: transparent; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 .install-section { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 120px 0; display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 90px; }
@@ -252,7 +254,7 @@ footer nav { justify-content: end; }
   h1 { font-size: clamp(2.9rem, 15vw, 4rem); }
   .hero-actions { display: grid; }
   .action-note { max-width: none; }
-  .demo-banner { width: calc(100% - 32px); margin: 12px auto -20px; align-items: stretch; flex-direction: column; padding: 14px; }
+  .demo-banner { bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100% - 32px); align-items: stretch; flex-direction: column; padding: 14px; }
   .demo-banner div { display: grid; grid-template-columns: 1fr 1fr; }
   .hero-art { border-radius: 16px; }
   .hero-art figcaption { position: static; border: 0; border-top: 1px solid var(--frost); border-radius: 0; }

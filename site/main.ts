@@ -23,6 +23,7 @@ let undoAction: (() => void) | null = null;
 let toastTimer = 0;
 
 if (isDemo) {
+  document.body.classList.add("demo-mode");
   document.title = "Demo — A11y Playtest Captioner";
   const demoUrl = new URL("/demo", location.origin).href;
   document.querySelector<HTMLLinkElement>("link[rel='canonical']")?.setAttribute("href", demoUrl);

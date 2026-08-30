@@ -111,6 +111,14 @@ test("opens the isolated sample workspace from the first-screen action", async (
   await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
 });
 
+test("keeps the hidden demo banner from intercepting normal workspace undo", async ({ page }) => {
+  await expect(page.getByLabel("Demo controls")).toBeHidden();
+  await page.getByRole("button", { name: "Load example project" }).click();
+  await page.getByRole("button", { name: /Delete “Ravine crossing”/ }).click();
+  await page.getByRole("button", { name: "Undo" }).click();
+  await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
+});
+
 test("keeps natural Tab order through state authoring after immediate saves", async ({ page }) => {
   await page.getByRole("button", { name: "Add first state" }).click();
 
