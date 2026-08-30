@@ -1,29 +1,33 @@
-# A11y Playtest Captioner — review 2 handoff
+# A11y Playtest Captioner — polish 2 handoff
 
-## Status: FAIL
+## Status: PASS
 
-Adversarial first-read review 2 is recorded in [review-2.md](./review-2.md). No product code was modified.
+Repair commit: `6e39fb8bb65954fddd0092329fbe6dc2ad24e7a1`
+Deployment: `4cb0d9c3-0a68-44a4-afa4-2ab7cecb15d2`
+Live: <https://a11y-playtest-captioner.sociobot.in/>
 
-## Findings
+All cumulative findings in [polish-2.md](./polish-2.md) are resolved. `/demo` is now a product-first isolated sample view, programmatic demo exit restores and announces focus, claims have exact tagged evidence, the demo has static social metadata, and copy uses consistent captions/actions language.
 
-- **F-2-1 (blocking):** `/demo` opens on the marketing hero; neither viewport shows the populated workspace on the first post-click screen.
-- **F-1-2 (blocking regression):** `/demo` → **Start for real** leaves focus on `BODY` and does not announce the destination.
-- **F-1-3 (blocking regression):** several demo, library, validation, import, and on-device speech statements are broader than the registered tagged tests.
-- **F-2-2 (minor):** `/demo` retains the home page’s OG and Twitter title/description.
-- **F-2-3 (minor):** landing and README copy still mix caption/description and action/cue terminology and retain some jargon or unsupported wording.
+## Exact verification evidence
 
-## Verification performed
+- Clean clone: `/tmp/a11y-captioner-clean.NMgb1M` from repair commit; `npm ci` passed.
+- Every one of the 13 exact commands in `.factory/claims.json` passed independently in that clone.
+- Full clean-clone `npm test` passed: 16 unit/static tests, packed ESM/CJS consumer check, 22 browser claim checks, and 32 workspace checks across desktop and 390 × 844 mobile. `npm run build` created `dist/lib` and `dist/site`; `npm pack --dry-run` created the 12-file, 17.6 kB package.
+- Live `verify-url.sh` passed for home and demo. Fresh live AxeBuilder found zero violations on home, demo, Privacy, Terms, and 404. Lighthouse mobile accessibility: 1.0.
+- Live first-screen proof: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-demo-mobile-first-view.png`; structured checks and route focus result: `/tmp/a11y-captioner-polish2-live.yXd4pL/live-regression.json`.
+- All 19 public files match the deployed `dist/site` byte-for-byte. Live CSP, no-referrer, permissions policy, and immutable hashed-asset cache headers are present.
 
-- Cold live Chromium contexts at 390 × 844 and 1440 × 900.
-- One-click live demo flow, reset, exit, seeded real-data isolation, request log, cookie check, and live offline reload.
-- Every `.factory/claims.json` command from fresh clone `/tmp/a11y-captioner-review2-clean.IDcyek` at `03333e4584c531ba28af434f8576ce3113ca49f8`; all passed.
-- `npm test`; passed (15 unit tests, package consumer, 18 claim-browser tests, 25 workspace tests, 5 expected skips).
-- `npm run build`; passed and produced `dist/lib` and `dist/site`.
-- `/opt/fleet/lib/verify-url.sh`; passed. Evidence is in `/tmp/a11y-captioner-review2-live.LTBao6`.
-- Live AxeBuilder checks on home, demo, privacy, terms, and 404; zero violations.
-- Live metadata/header inspection, internal/external link crawl, deep-link checks, designed 404 check, and Home → Privacy → Back focus check.
-- Read and independently checked `.factory/review-1.md`, `.factory/polish-1.md`, and the prior handoff.
+## Run locally
 
-## Next step
+```sh
+npm ci
+npm test
+npm run build
+npm pack --dry-run
+```
 
-Repair every finding in `.factory/review-2.md`, add the specified demo-first-viewport, programmatic-route-focus, claim, and metadata regressions, deploy, and rerun the complete review. The factory owns deployment and npm publishing.
+Deploy `dist/site` as the static site. Do not publish the npm package from this checkout; the factory owns registry credentials.
+
+## Known gaps
+
+None.
