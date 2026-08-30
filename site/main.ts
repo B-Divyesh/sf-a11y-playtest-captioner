@@ -1,5 +1,3 @@
-import "@fontsource/atkinson-hyperlegible/latin-400.css";
-import "@fontsource/atkinson-hyperlegible/latin-700.css";
 import "./styles.css";
 import { createCaptioner, CaptionerValidationError } from "../src/index";
 import { emptyProject, sampleProject, type EditableCue, type EditableState, type Project } from "./sample";

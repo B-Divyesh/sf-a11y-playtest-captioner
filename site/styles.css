@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 400;
+  src: url("../node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 700;
+  src: url("../node_modules/@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+}
+
 :root {
   color-scheme: dark;
   font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
