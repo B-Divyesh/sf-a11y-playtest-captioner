@@ -30,7 +30,7 @@
     "lint": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:package": "npm run build:lib && node tests/package-consumer.mjs",
-    "test:claims": "npm run build:site && playwright test tests/e2e/claims.spec.ts",
+    "test:claims": "npm run build:site && node tests/site-build-surface.mjs && playwright test tests/e2e/claims.spec.ts",
     "test:e2e": "npm run build:site && playwright test tests/e2e/workspace.spec.ts",
     "test": "npm run test:unit && npm run test:package && npm run test:claims && npm run test:e2e"
   },

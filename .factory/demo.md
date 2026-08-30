@@ -2,7 +2,7 @@
 
 Open [the demo route](https://a11y-playtest-captioner.sociobot.in/demo) or append `?demo=1` to the home URL. The landing-page **Try it with sample data** action opens the same sandbox in one click.
 
-The demo starts with the two-state Signal Hollow project:
+The demo opens directly on a populated workspace summary, so the first screen shows Ravine crossing, its caption, and a live **Speak this caption** rehearsal control. It starts with the two-state Signal Hollow project:
 
 - Ravine crossing has English and Spanish descriptions plus Loose rope and Anchor post cues.
 - Watcher alert has English and Spanish descriptions plus a Stone cover cue.

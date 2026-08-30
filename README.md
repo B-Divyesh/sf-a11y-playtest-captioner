@@ -50,9 +50,9 @@ disconnect();
 captioner.destroy();
 ```
 
-Use valid BCP 47 tags such as `en`, `es`, or `pt-BR` for localized strings. Each state and action can use its own fallback language. The spoken language matches the action text being read.
+Use language tags such as `en`, `es`, or `pt-BR` for localized strings. Each state and action can use its own fallback language. The spoken language matches the action text being read.
 
-Speech uses the browser’s on-device speech feature. Project content and speech text are not sent to a product service. `mount()` adds a hidden polite announcement near your canvas. Use `{ liveRegion: false }` when your game already announces changes.
+Speech uses your browser’s speech feature. Project content and speech text are not sent to a product service. `mount()` adds a hidden screen-reader status message near your canvas. Use `{ liveRegion: false }` when your game already announces changes.
 
 ## Public API
 
@@ -61,13 +61,13 @@ Speech uses the browser’s on-device speech feature. Project content and speech
 - `activate(id)` selects a state and announces its description.
 - `setLocale(tag)` selects the best available language.
 - `moveFocus(direction)` follows the authored action order.
-- `speak()` reads the current state and action with on-device speech.
-- `mount(element, options?)` manages an announcement beside the game.
+- `speak()` reads the current state and action with browser speech.
+- `mount(element, options?)` manages a status message beside the game.
 - `connectKeyboard(target?)` enables the documented review keys.
 - `getSnapshot()` and `subscribe(listener)` provide current state.
 - `destroy()` removes generated listeners and elements.
 
-See the exported TypeScript types for the complete contract. Invalid IDs, language tags, duplicate state/cue IDs, and blank descriptions throw `CaptionerValidationError` with actionable messages.
+See the exported TypeScript types for the complete contract. Invalid IDs, language tags, duplicate state or action IDs, and blank descriptions throw `CaptionerValidationError`. Each message names the invalid field.
 
 ## Local authoring site
 
@@ -80,7 +80,7 @@ npm install
 npm run dev
 ```
 
-Open the printed local URL. The demo makes no cross-origin product requests while you author or use browser speech.
+Open the printed local URL. The demo makes no cross-origin product requests while you author, import, or use browser speech.
 
 ## Test, build, and package
 

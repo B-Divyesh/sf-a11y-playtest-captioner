@@ -156,18 +156,100 @@ describe("createCaptioner", () => {
   });
 
   it("runs the documented library lifecycle @claim:library-api", () => {
-    const captioner = createCaptioner();
-    const listener = vi.fn();
-    const unsubscribe = captioner.subscribe(listener);
-    captioner.register(state);
-    expect(captioner.activate("bridge-out").stateId).toBe("bridge-out");
-    expect(captioner.setLocale("es-MX").resolvedLocale).toBe("es");
-    expect(captioner.moveFocus("next").activeCue?.id).toBe("rope");
-    expect(captioner.getSnapshot().activeCue?.id).toBe("rope");
-    expect(listener).toHaveBeenCalled();
-    unsubscribe();
-    captioner.destroy();
-    expect(() => captioner.register(state)).toThrow(/destroyed/);
+    class FakeElement {}
+    class FakeRegion extends FakeElement {
+      dataset: Record<string, string> = {};
+      style: Record<string, string> = {};
+      className = "";
+      lang = "";
+      textContent = "";
+      attributes = new Map<string, string>();
+      parent: FakeHost | null = null;
+      setAttribute(name: string, value: string): void { this.attributes.set(name, value); }
+      remove(): void { this.parent?.regions.delete(this); }
+    }
+    class FakeHost extends FakeElement {
+      readonly regions = new Set<FakeRegion>();
+      readonly ownerDocument = { createElement: () => new FakeRegion() };
+      insertAdjacentElement(_where: InsertPosition, region: Element): void {
+        const managed = region as unknown as FakeRegion;
+        managed.parent = this;
+        this.regions.add(managed);
+      }
+    }
+    class FakeKeyboardTarget {
+      listener: ((event: KeyboardEvent) => void) | null = null;
+      addEventListener(_type: string, listener: EventListener): void { this.listener = listener as (event: KeyboardEvent) => void; }
+      removeEventListener(): void { this.listener = null; }
+      press(key: string): void {
+        const event = { key, target: null, defaultPrevented: false, preventDefault() {} } as unknown as KeyboardEvent;
+        this.listener?.(event);
+      }
+    }
+    class FakeUtterance {
+      lang = "";
+      voice: SpeechSynthesisVoice | null = null;
+      constructor(readonly text: string) {}
+    }
+    const speak = vi.fn();
+    const cancel = vi.fn();
+    vi.stubGlobal("Element", FakeElement);
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    vi.stubGlobal("window", { speechSynthesis: { cancel, getVoices: () => [], speak } });
+    try {
+      const captioner = createCaptioner();
+      const listener = vi.fn();
+      const unsubscribe = captioner.subscribe(listener);
+      captioner.register(state);
+      const host = new FakeHost();
+      captioner.mount(host as unknown as Element);
+      expect(captioner.activate("bridge-out").stateId).toBe("bridge-out");
+      const region = [...host.regions][0];
+      expect(region?.textContent).toContain("Broken bridge");
+      expect(region?.attributes.get("aria-live")).toBe("polite");
+      expect(captioner.setLocale("es-MX").resolvedLocale).toBe("es");
+      const target = new FakeKeyboardTarget();
+      const disconnect = captioner.connectKeyboard(target as unknown as HTMLElement);
+      target.press("ArrowRight");
+      expect(captioner.getSnapshot().activeCue?.id).toBe("rope");
+      target.press("s");
+      expect(speak).toHaveBeenCalledWith(expect.objectContaining({ lang: "es" }));
+      disconnect();
+      target.press("End");
+      expect(captioner.getSnapshot().activeCue?.id).toBe("rope");
+      expect(listener).toHaveBeenCalled();
+      unsubscribe();
+      captioner.destroy();
+      expect(host.regions.size).toBe(0);
+      expect(target.listener).toBeNull();
+      expect(cancel).toHaveBeenCalled();
+      expect(() => captioner.register(state)).toThrow(/destroyed/);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("names every invalid field in a validation error @claim:validation-errors", () => {
+    const firstAction = state.focusOrder?.[0];
+    if (!firstAction) throw new Error("The validation fixture needs one action.");
+    const duplicateAction = { ...state, focusOrder: [firstAction, firstAction] };
+    const cases: Array<[string, () => unknown]> = [
+      ["locale", () => createCaptioner({ locale: "not_a_locale" })],
+      ["descriptions key", () => createCaptioner({ states: [{ ...state, descriptions: { "!": "Broken bridge" } }] })],
+      ["State ID", () => createCaptioner({ states: [{ ...state, id: "bad id" }] })],
+      ["already registered", () => createCaptioner({ states: [state, { ...state }] })],
+      ["duplicate action ID", () => createCaptioner({ states: [duplicateAction] })],
+      ["descriptions.en", () => createCaptioner({ states: [{ ...state, descriptions: { en: " " } }] })]
+    ];
+    for (const [field, run] of cases) {
+      try {
+        run();
+        throw new Error(`Expected ${field} to be rejected.`);
+      } catch (error) {
+        expect(error).toBeInstanceOf(CaptionerValidationError);
+        expect((error as Error).message).toContain(field);
+      }
+    }
   });
 
   it("validates tags and speaks action fallback in its resolved language @claim:language-tags-and-fallback", () => {

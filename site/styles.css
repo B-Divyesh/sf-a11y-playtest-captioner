@@ -68,6 +68,17 @@ main { overflow: hidden; }
 .demo-banner button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--frost); border-radius: 8px; color: var(--text); background: transparent; cursor: pointer; }
 .demo-banner button:first-child { color: var(--cyan); }
 .demo-banner button:last-child { border-color: var(--cyan); color: var(--cyan-ink); background: var(--cyan); font-weight: 700; }
+.demo-overview { display: none; }
+.demo-mode .hero, .demo-mode .install-section, .demo-mode .scope-note { display: none; }
+.demo-mode .demo-banner { position: sticky; top: 0; z-index: 60; left: auto; bottom: auto; width: 100%; min-height: 0; padding: 10px max(24px, calc((100vw - 1440px) / 2)); border-inline: 0; border-radius: 0; box-shadow: 0 10px 30px rgba(0, 0, 0, .22); transform: none; }
+.demo-mode .workspace-section { padding-top: 28px; }
+.demo-mode .workspace-section > .section-heading { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.demo-mode .demo-overview { position: relative; display: block; max-width: 1000px; margin: 0 auto 24px; padding: 22px 24px; border: 1px solid rgba(93, 228, 208, .48); border-radius: 16px; background: rgba(7, 17, 31, .86); box-shadow: var(--shadow); }
+.demo-overview .eyebrow { margin-bottom: 10px; }
+.demo-overview > div { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.demo-overview h2 { margin: 0; font-size: clamp(1.55rem, 4vw, 2.3rem); line-height: 1.05; }
+.demo-label, .demo-action-note { margin: 0; color: var(--soft); font-size: 14px; }
+.demo-overview > p:not(.eyebrow):not(.demo-action-note) { max-width: 760px; margin: 14px 0 7px; color: var(--muted); font-size: 17px; }
 .hero { position: relative; width: min(1440px, calc(100% - 48px)); min-height: 680px; margin: 0 auto; display: grid; grid-template-columns: minmax(360px, .82fr) minmax(500px, 1.18fr); align-items: center; gap: 50px; padding: 74px 0 96px; }
 .hero::before { content: ""; position: absolute; inset: 0 -12vw; z-index: -2; opacity: .22; background-image: linear-gradient(rgba(93, 228, 208, .13) 1px, transparent 1px), linear-gradient(90deg, rgba(93, 228, 208, .13) 1px, transparent 1px); background-size: 72px 72px; mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 70%, transparent); }
 .hero::after { content: ""; position: absolute; z-index: -1; width: 440px; height: 440px; right: 12%; top: 18%; border-radius: 50%; background: rgba(39, 150, 151, .16); filter: blur(110px); }
@@ -202,7 +213,7 @@ kbd { padding: 2px 5px; border: 1px solid currentColor; border-radius: 4px; font
 .project-actions { display: flex; gap: 10px; }
 #import-file { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
 .toast { position: fixed; z-index: 50; right: 24px; bottom: 24px; max-width: min(440px, calc(100vw - 48px)); padding: 14px 16px; border: 1px solid var(--cyan); border-radius: 10px; color: var(--text); background: #10283a; box-shadow: var(--shadow); }
-.demo-mode .toast { bottom: 96px; }
+.demo-mode .toast { bottom: 24px; }
 .toast button { min-height: 44px; margin-left: 10px; border: 0; border-radius: 6px; color: var(--cyan); background: transparent; font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 .install-section { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 120px 0; display: grid; grid-template-columns: .9fr 1.1fr; align-items: center; gap: 90px; }
@@ -277,6 +288,14 @@ footer nav { justify-content: end; }
   .hero-facts { gap: 3px; margin-top: 14px; font-size: 13px; line-height: 1.2; }
   .demo-banner { bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100% - 32px); align-items: stretch; flex-direction: column; padding: 14px; }
   .demo-banner div { display: grid; grid-template-columns: 1fr 1fr; }
+  .demo-mode .demo-banner { top: 0; width: 100%; padding: 8px 16px; gap: 8px; }
+  .demo-mode .demo-banner p { font-size: 13px; line-height: 1.25; }
+  .demo-mode .demo-banner button { min-height: 44px; padding: 6px 8px; font-size: 14px; }
+  .demo-mode .workspace-section { padding-top: 16px; }
+  .demo-mode .demo-overview { margin-bottom: 16px; padding: 16px; }
+  .demo-overview > div { align-items: stretch; flex-direction: column; gap: 12px; }
+  .demo-overview .button { width: 100%; }
+  .demo-overview > p:not(.eyebrow):not(.demo-action-note) { margin-top: 10px; font-size: 16px; line-height: 1.38; }
   .hero-art { border-radius: 16px; }
   .hero-art figcaption { position: static; border: 0; border-top: 1px solid var(--frost); border-radius: 0; }
   .hero-art figcaption strong { display: none; }

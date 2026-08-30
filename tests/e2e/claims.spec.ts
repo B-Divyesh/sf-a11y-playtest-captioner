@@ -7,10 +7,25 @@ const DEMO_STORAGE_KEY = "demo:a11y-playtest-captioner:project:v1";
 async function openDemo(page: import("@playwright/test").Page): Promise<void> {
   await page.goto("/demo");
   await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Caption game states before playtests");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Ravine crossing");
   await expect(page.getByLabel("Demo controls")).toBeVisible();
+  await expect(page.locator("#demo-overview")).toBeVisible();
   await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
 }
+
+test("loads the complete sample into the first demo viewport @claim:demo-seed", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Try it with sample data" }).click();
+  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
+  await expect(page.getByText("Watcher alert", { exact: true }).first()).toBeVisible();
+  const firstView = await page.evaluate(() => window.innerHeight);
+  for (const selector of ["#demo-preview-state", "#demo-preview-description", "#demo-preview-speak"]) {
+    const box = await page.locator(selector).boundingBox();
+    if (!box) throw new Error(`Could not measure ${selector}.`);
+    expect(box.y + box.height, selector).toBeLessThanOrEqual(firstView);
+  }
+});
 
 test("keeps a real draft isolated from demo actions @claim:demo-isolation", async ({ page }) => {
   const realDraft = JSON.stringify({ sentinel: "ordinary-draft-must-survive" });
@@ -70,13 +85,31 @@ test("keeps demo edits and browser speech on this origin @claim:local-only", asy
   await page.getByLabel(/State description/).fill("A broken bridge blocks the path. Secure the rope to cross.");
   await page.locator("#caption-monitor").focus();
   await page.locator("#caption-monitor").press("ArrowRight");
-  await page.getByRole("button", { name: /Speak/ }).click();
+  await page.locator("#speak-preview").click();
 
   expect(await page.context().cookies()).toEqual([]);
   expect(requests).not.toHaveLength(0);
   for (const request of requests) expect(new URL(request).origin).toBe("http://127.0.0.1:4173");
   const storage = await page.evaluate((key) => localStorage.getItem(key), DEMO_STORAGE_KEY);
   expect(storage).toContain("A broken bridge blocks the path");
+});
+
+test("reads an imported project locally @claim:import-local", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto("/");
+  await page.getByLabel("Import JSON").setInputFiles({
+    name: "local-fixture.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify({
+      version: 1,
+      name: "Imported local fixture",
+      defaultLocale: "en",
+      states: [{ id: "imported-gate", name: "Imported gate", descriptions: { en: "A local fixture opens this gate." }, focusOrder: [] }]
+    }))
+  });
+  await expect(page.getByText("Imported gate", { exact: true }).first()).toBeVisible();
+  for (const request of requests) expect(new URL(request).origin).toBe("http://127.0.0.1:4173");
 });
 
 test("lets a visitor author in the free demo without a sign-in or payment step @claim:free-demo", async ({ page }) => {

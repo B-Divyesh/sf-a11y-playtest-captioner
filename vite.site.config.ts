@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import { createHash } from "node:crypto";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 function injectOfflineAssets() {
@@ -12,7 +12,19 @@ function injectOfflineAssets() {
       const assets = (await readdir(resolve(output, "assets"))).map((file) => `/assets/${file}`);
       const workerPath = resolve(output, "sw.js");
       const worker = await readFile(workerPath, "utf8");
-      const pageFiles = ["index.html", "privacy/index.html", "terms/index.html", "404.html"];
+      const homePage = await readFile(resolve(output, "index.html"), "utf8");
+      const demoPage = homePage
+        .replace('content="Author localized game-state captions and rehearse their keyboard order before browser-game playtests."', 'content="Try the isolated sample workspace for browser-game caption authoring."')
+        .replace('href="https://a11y-playtest-captioner.sociobot.in/"', 'href="https://a11y-playtest-captioner.sociobot.in/demo"')
+        .replaceAll('content="A11y Playtest Captioner — game-state captions"', 'content="Demo — A11y Playtest Captioner"')
+        .replaceAll('content="Author localized game-state captions and rehearse their keyboard order before browser-game playtests."', 'content="Try the isolated sample workspace for browser-game caption authoring."')
+        .replace('content="https://a11y-playtest-captioner.sociobot.in/"', 'content="https://a11y-playtest-captioner.sociobot.in/demo"')
+        .replace('<title>A11y Playtest Captioner — game-state captions</title>', '<title>Demo — A11y Playtest Captioner</title>')
+        .replace('<h1 id="hero-title">Caption game states before playtests</h1>', '<h2 id="hero-title">Caption game states before playtests</h2>')
+        .replace('<h2 id="demo-overview-title"><span id="demo-preview-state"></span></h2>', '<h1 id="demo-overview-title"><span id="demo-preview-state"></span></h1>');
+      await mkdir(resolve(output, "demo"), { recursive: true });
+      await writeFile(resolve(output, "demo/index.html"), demoPage);
+      const pageFiles = ["index.html", "demo/index.html", "privacy/index.html", "terms/index.html", "404.html"];
       const shellFiles = [
         "index.html",
         "privacy/index.html",

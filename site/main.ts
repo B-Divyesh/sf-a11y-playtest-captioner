@@ -1,7 +1,7 @@
 import "./styles.css";
 import { createCaptioner, CaptionerValidationError } from "../src/index";
 import { emptyProject, sampleProject, type EditableCue, type EditableState, type Project } from "./sample";
-import { establishRouteContext } from "./route-context";
+import { establishRouteContext, prepareRouteFocus } from "./route-context";
 
 const REAL_STORAGE_KEY = "a11y-playtest-captioner:project:v1";
 const DEMO_STORAGE_KEY = "demo:a11y-playtest-captioner:project:v1";
@@ -23,11 +23,30 @@ let toastTimer = 0;
 
 if (isDemo) {
   document.body.classList.add("demo-mode");
+  const heroTitle = document.getElementById("hero-title");
+  if (heroTitle?.tagName === "H1") {
+    const demoted = document.createElement("h2");
+    demoted.id = heroTitle.id;
+    demoted.textContent = heroTitle.textContent;
+    heroTitle.replaceWith(demoted);
+  }
+  const demoTitle = document.getElementById("demo-overview-title");
+  if (demoTitle?.tagName === "H2") {
+    const promoted = document.createElement("h1");
+    promoted.id = demoTitle.id;
+    promoted.innerHTML = demoTitle.innerHTML;
+    demoTitle.replaceWith(promoted);
+  }
   document.title = "Demo — A11y Playtest Captioner";
   const demoUrl = new URL("/demo", location.origin).href;
   document.querySelector<HTMLLinkElement>("link[rel='canonical']")?.setAttribute("href", demoUrl);
   document.querySelector<HTMLMetaElement>("meta[property='og:url']")?.setAttribute("content", demoUrl);
-  document.querySelector<HTMLMetaElement>("meta[name='description']")?.setAttribute("content", "Try the isolated sample workspace for browser-game caption authoring.");
+  const description = "Try the isolated sample workspace for browser-game caption authoring.";
+  document.querySelector<HTMLMetaElement>("meta[name='description']")?.setAttribute("content", description);
+  document.querySelector<HTMLMetaElement>("meta[property='og:title']")?.setAttribute("content", "Demo — A11y Playtest Captioner");
+  document.querySelector<HTMLMetaElement>("meta[property='og:description']")?.setAttribute("content", description);
+  document.querySelector<HTMLMetaElement>("meta[name='twitter:title']")?.setAttribute("content", "Demo — A11y Playtest Captioner");
+  document.querySelector<HTMLMetaElement>("meta[name='twitter:description']")?.setAttribute("content", description);
   document.getElementById("demo-banner")?.removeAttribute("hidden");
 }
 
@@ -146,8 +165,21 @@ function render(): void {
   renderStateList();
   renderAuthor();
   renderReview();
+  renderDemoPreview();
   bindWorkspace();
   app.setAttribute("aria-busy", "false");
+}
+
+function renderDemoPreview(): void {
+  if (!isDemo) return;
+  const state = currentState();
+  const name = document.getElementById("demo-preview-state");
+  const description = document.getElementById("demo-preview-description");
+  if (!state || !name || !description) return;
+  const caption = resolved(state.descriptions, selectedLocale);
+  name.textContent = state.name;
+  description.textContent = caption.text;
+  description.lang = caption.locale;
 }
 
 function renderStateList(): void {
@@ -577,6 +609,7 @@ function startForReal(): void {
   try {
     localStorage.removeItem(DEMO_STORAGE_KEY);
   } finally {
+    prepareRouteFocus();
     window.location.assign("/");
   }
 }
@@ -625,6 +658,10 @@ required<HTMLButtonElement>("copy-install").addEventListener("click", async (eve
 if (isDemo) {
   required<HTMLButtonElement>("reset-demo").addEventListener("click", resetDemo);
   required<HTMLButtonElement>("start-for-real").addEventListener("click", startForReal);
+  required<HTMLButtonElement>("demo-preview-speak").addEventListener("click", () => {
+    const state = currentState();
+    if (state) speakPreview(state);
+  });
 }
 
 const offlineStatus = required<HTMLElement>("offline-status");

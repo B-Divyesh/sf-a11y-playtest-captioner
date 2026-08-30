@@ -72,7 +72,7 @@ function normalizeLocalizedText(value: LocalizedText, field: string): Record<str
 }
 
 function normalizeCue(cue: CaptionCue, stateId: string): CaptionCue {
-  assertId(cue.id, `Cue ID in state “${stateId}”`);
+  assertId(cue.id, `Action ID in state “${stateId}”`);
   return Object.freeze({
     id: cue.id,
     labels: Object.freeze(normalizeLocalizedText(cue.labels, `Cue “${cue.id}” labels`)),
@@ -94,7 +94,7 @@ function normalizeState(state: CaptionState): CaptionState {
   const focusOrder = (state.focusOrder ?? []).map((cue) => {
     const normalized = normalizeCue(cue, state.id);
     if (cueIds.has(normalized.id)) {
-      throw new CaptionerValidationError(`State “${state.id}” contains duplicate cue ID “${normalized.id}”.`);
+      throw new CaptionerValidationError(`State “${state.id}” contains duplicate action ID “${normalized.id}”.`);
     }
     cueIds.add(normalized.id);
     return normalized;

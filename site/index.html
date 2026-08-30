@@ -45,7 +45,7 @@
         <div class="hero-copy">
           <p class="eyebrow"><span aria-hidden="true"></span> For browser-game creators</p>
           <h1 id="hero-title">Caption game states before playtests</h1>
-          <p class="lede">For browser-game creators who need multilingual descriptions and keyboard rehearsal before inviting disabled playtesters.</p>
+          <p class="lede">For browser-game creators who need multilingual captions and keyboard rehearsal before inviting disabled playtesters.</p>
           <div class="hero-actions">
             <a class="button primary" href="/demo">Try it with sample data</a>
             <span class="action-note">Loads a two-state sample in a private demo.</span>
@@ -60,11 +60,20 @@
         </div>
         <figure class="hero-art">
           <img src="/hero-caption-landscape.webp" srcset="/hero-caption-landscape-480.webp 480w, /hero-caption-landscape.webp 960w" sizes="(max-width: 600px) calc(100vw - 32px), (max-width: 900px) calc(100vw - 40px), 55vw" width="768" height="512" alt="Translucent caption planes connected across a dark game-state landscape" fetchpriority="high" />
-          <figcaption><span>Caption state map</span><strong>Author states in deliberate order</strong></figcaption>
+          <figcaption><span>Caption state map</span><strong>Connect each game state to its ordered actions.</strong></figcaption>
         </figure>
       </section>
 
       <section class="workspace-section" id="workspace" aria-labelledby="workspace-title">
+        <section class="demo-overview" id="demo-overview" aria-labelledby="demo-overview-title">
+          <p class="eyebrow"><span aria-hidden="true"></span> Sample workspace</p>
+          <div>
+            <div><p class="demo-label">Active game state</p><h2 id="demo-overview-title"><span id="demo-preview-state"></span></h2></div>
+            <button class="button primary" id="demo-preview-speak" type="button">Speak this caption</button>
+          </div>
+          <p id="demo-preview-description"></p>
+          <p class="demo-action-note">Rehearsal control: hear the active caption before reviewing its ordered actions below.</p>
+        </section>
         <div class="section-heading">
           <div>
             <p class="eyebrow"><span aria-hidden="true"></span> Local workspace</p>
@@ -96,7 +105,7 @@
           <section class="review-pane" aria-labelledby="review-title">
             <div class="pane-heading">
               <div><span class="step-number">03</span><h3 id="review-title">Test action order</h3></div>
-              <span class="on-device">On device</span>
+              <span class="on-device">Browser speech</span>
             </div>
             <div id="review-content"></div>
           </section>
@@ -116,7 +125,7 @@
         <div>
           <p class="eyebrow"><span aria-hidden="true"></span> TypeScript library</p>
           <h2 id="install-title">Use caption states in your game</h2>
-          <p>Register authored states, activate them from your game loop, and reuse the JSON you rehearsed here.</p>
+          <p>Use your authored captions in the game states you register with the library.</p>
         </div>
         <div class="code-card">
           <div class="code-top"><span>npm</span><button type="button" id="copy-install">Copy command</button></div>

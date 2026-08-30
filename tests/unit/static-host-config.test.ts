@@ -27,7 +27,7 @@ describe("Azure Static Web Apps delivery policy", () => {
   });
 
   it("rewrites only the demo route and returns the styled 404 document for unknown paths", () => {
-    expect(config.routes.find((entry) => entry.route === "/demo")).toMatchObject({ rewrite: "/index.html" });
+    expect(config.routes.find((entry) => entry.route === "/demo")).toMatchObject({ rewrite: "/demo/index.html" });
     expect(config.responseOverrides?.["404"]).toEqual({ rewrite: "/404.html" });
   });
 });

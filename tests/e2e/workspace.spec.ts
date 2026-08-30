@@ -266,6 +266,16 @@ test("moves focus and announces the destination on document route changes", asyn
   await expect(page.locator("#route-announcement")).toContainText("Opened A11y Playtest Captioner — game-state captions");
 });
 
+test("moves focus and announces home after leaving the demo", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium", "One desktop route-focus regression is sufficient");
+  await page.goto("/demo");
+  await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
+  await page.getByRole("button", { name: "Start for real" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Caption game states before playtests" })).toBeFocused();
+  await expect(page.locator("#route-announcement")).toContainText("Opened A11y Playtest Captioner — game-state captions");
+});
+
 test("has no axe accessibility violations", async ({ page }) => {
   await page.getByRole("button", { name: "Load example project" }).click();
   const results = await new AxeBuilder({ page: page as never }).analyze();

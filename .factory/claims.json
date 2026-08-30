@@ -7,6 +7,13 @@
     "sandbox": "fresh browser context with a seeded ordinary draft; /demo edit, reset, and exit preserve the ordinary key and discard the demo key"
   },
   {
+    "id": "demo-seed",
+    "claim": "The demo loads the two-state Signal Hollow sample and shows a caption rehearsal control immediately.",
+    "where": "landing action note, README local authoring site, demo route",
+    "test": "npm run test:claims -- --grep @claim:demo-seed",
+    "sandbox": "fresh context clicks the landing demo action, then asserts both named sample states, a realistic caption, and the rehearsal control intersect the first viewport"
+  },
+  {
     "id": "offline-reload",
     "claim": "Works offline after the first visit.",
     "where": "landing facts, workspace status, README",
@@ -19,6 +26,13 @@
     "where": "privacy page, README",
     "test": "npm run test:claims -- --grep @claim:local-only",
     "sandbox": "fresh /demo flow records every request through editing and Speak, asserts same-origin-only requests, no cookies, and demo-only storage"
+  },
+  {
+    "id": "import-local",
+    "claim": "Imported files are read locally.",
+    "where": "Privacy page",
+    "test": "npm run test:claims -- --grep @claim:import-local",
+    "sandbox": "fresh ordinary workspace imports a shipped JSON fixture while request capture asserts same-origin-only traffic and the imported state appears"
   },
   {
     "id": "free-demo",
@@ -43,7 +57,7 @@
   },
   {
     "id": "language-tags-and-fallback",
-    "claim": "Localized captions use valid language tags, and speech uses the language of the action text.",
+    "claim": "Localized captions use language tags, and speech uses the language of the action text.",
     "where": "README usage notes and Public API",
     "test": "npm run test:unit -- --testNamePattern @claim:language-tags-and-fallback",
     "sandbox": "library fixture rejects an invalid tag, falls an English action back from Spanish, and asserts English speech language"
@@ -57,10 +71,17 @@
   },
   {
     "id": "library-api",
-    "claim": "The documented library API creates, registers, activates, reviews, observes, and destroys isolated captioners.",
+    "claim": "The documented library API registers states, announces activation, supports review keys, and cleans up generated browser resources.",
     "where": "README Public API",
     "test": "npm run test:unit -- --testNamePattern @claim:library-api",
     "sandbox": "library fixture performs the documented state, locale, focus, subscription, and cleanup flow"
+  },
+  {
+    "id": "validation-errors",
+    "claim": "Invalid IDs, language tags, duplicate state or action IDs, and blank descriptions throw CaptionerValidationError that names the invalid field.",
+    "where": "README Public API",
+    "test": "npm run test:unit -- --testNamePattern @claim:validation-errors",
+    "sandbox": "table-driven library fixture supplies each invalid input and asserts CaptionerValidationError plus an error message naming the invalid field"
   },
   {
     "id": "json-export",

@@ -14,7 +14,7 @@
   "routes": [
     {
       "route": "/demo",
-      "rewrite": "/index.html"
+      "rewrite": "/demo/index.html"
     },
     {
       "route": "/assets/*",

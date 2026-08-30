@@ -2,6 +2,13 @@
  * Gives every full-document route change the same useful starting point.
  * `preventScroll` leaves the browser's Back/Forward scroll restoration alone.
  */
+const ROUTE_FOCUS_KEY = "a11y-captioner:route-focus";
+
+/** Marks a full-document navigation so its destination starts at its subject. */
+export function prepareRouteFocus(): void {
+  sessionStorage.setItem(ROUTE_FOCUS_KEY, "pending");
+}
+
 export function establishRouteContext(): void {
   const heading = document.querySelector<HTMLElement>("main h1");
   if (!heading) return;
@@ -22,13 +29,13 @@ export function establishRouteContext(): void {
     if (!link) return;
     const target = new URL(link.href, location.href);
     if (target.origin === location.origin && target.pathname !== location.pathname) {
-      sessionStorage.setItem("a11y-captioner:route-focus", "pending");
+      prepareRouteFocus();
     }
   }, { capture: true });
 
   const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
-  const shouldFocus = sessionStorage.getItem("a11y-captioner:route-focus") === "pending" || navigation?.type === "back_forward";
-  sessionStorage.removeItem("a11y-captioner:route-focus");
+  const shouldFocus = sessionStorage.getItem(ROUTE_FOCUS_KEY) === "pending" || navigation?.type === "back_forward";
+  sessionStorage.removeItem(ROUTE_FOCUS_KEY);
   if (!shouldFocus) return;
 
   requestAnimationFrame(() => {
