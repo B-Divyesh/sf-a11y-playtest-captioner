@@ -1,0 +1,44 @@
+[
+  {
+    "id": "demo-isolation",
+    "claim": "Sample data never changes your real draft.",
+    "where": "landing facts, demo banner, README",
+    "test": "npm run test:claims -- --grep @claim:demo-isolation",
+    "sandbox": "fresh browser context with a seeded ordinary draft; /demo edit, reset, and exit preserve the ordinary key and discard the demo key"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "landing facts, workspace status, README",
+    "test": "npm run test:claims -- --grep @claim:offline-reload",
+    "sandbox": "dedicated browser context; visit /demo, wait for the controlling worker, set offline, reload, and assert the sample workspace"
+  },
+  {
+    "id": "local-only",
+    "claim": "Project content and speech text are not sent to a product service.",
+    "where": "privacy page, README",
+    "test": "npm run test:claims -- --grep @claim:local-only",
+    "sandbox": "fresh /demo flow records every request through editing and Speak, asserts same-origin-only requests, no cookies, and demo-only storage"
+  },
+  {
+    "id": "free-demo",
+    "claim": "Free: no account or payment is needed to use the demo.",
+    "where": "landing facts, footer",
+    "test": "npm run test:claims -- --grep @claim:free-demo",
+    "sandbox": "fresh /demo context authors a cue and asserts no sign-in or payment control appears"
+  },
+  {
+    "id": "author-review",
+    "claim": "Author localized captions and rehearse the action order with a keyboard.",
+    "where": "landing lede, README",
+    "test": "npm run test:claims -- --grep @claim:author-review",
+    "sandbox": "fresh /demo context edits a caption and uses ArrowRight and End in the rehearsal monitor"
+  },
+  {
+    "id": "json-export",
+    "claim": "Export the demo project as JSON.",
+    "where": "workspace export control, README",
+    "test": "npm run test:claims -- --grep @claim:json-export",
+    "sandbox": "fresh /demo context exports the sample and parses the downloaded version 1 Signal Hollow JSON"
+  }
+]

@@ -50,6 +50,7 @@ State selection and panel updates use 180ms opacity/translate transitions that f
 ## Original asset plan and provenance
 
 - `site/public/hero-caption-landscape.webp` and its 480px responsive derivative: generated specifically for this product with the factory image deployment on 2026-08-27, then locally converted to WebP. Prompt: “Abstract luminous glass data landscape for a browser game accessibility authoring tool; a dark navy isometric playfield with translucent cyan caption planes, ten small connected state beacons, and one warm lime objective path; editorial 3D glass illustration, crisp restrained geometry, deep negative space, no people, no game-brand references, no words, no letters, no UI screenshot, no logos, no watermark; wide 16:10 composition.” Licensed for use as a generated project asset under the product’s MIT distribution.
+- `site/public/social-card.jpg` and `site/public/apple-touch-icon.png`: 2026-08-30 crops of that same original generated landscape, composed locally at 1200×630 and 180×180 respectively for social previews and device bookmarks. No external asset or text was introduced.
 - All interface symbols are hand-authored inline SVG using simple geometric paths, decorative where labels already provide meaning.
 
 The hero image explains the core mental model—intentional descriptions laid over game state—rather than decorating a generic marketing card.

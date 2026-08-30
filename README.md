@@ -1,6 +1,6 @@
 # A11y Playtest Captioner
 
-A zero-dependency TypeScript library and local authoring workspace for browser-game creators who want to write, localize, and rehearse concise descriptions of important visual game states.
+A TypeScript library and local authoring workspace for browser-game creators who need localized captions for important visual game states. Author localized captions and rehearse the action order with a keyboard.
 
 It does not inspect a canvas, generate descriptions, or certify accessibility. Authors decide what matters; the library provides predictable state, focus-order, keyboard, live-region, and on-device speech hooks for testing with disabled players.
 
@@ -50,7 +50,7 @@ disconnect();
 captioner.destroy();
 ```
 
-All localized strings are keyed by valid BCP 47 language tags. State and cue fallbacks resolve independently, and an active cue exposes its own `resolvedLocale` so its live-region and speech language tag always match the cue text. Speech uses the browser’s `speechSynthesis` API and never leaves the device. `mount()` adds a visually hidden polite live region next to the supplied game element; pass `{ liveRegion: false }` if the game already owns announcements.
+All localized strings are keyed by valid BCP 47 language tags. State and cue fallbacks resolve independently, and an active cue exposes its own `resolvedLocale` so its live-region and speech language tag always match the cue text. Speech uses the browser’s `speechSynthesis` API; project content and speech text are not sent to a product service. `mount()` adds a visually hidden polite live region next to the supplied game element; pass `{ liveRegion: false }` if the game already owns announcements.
 
 ## Public API
 
@@ -69,14 +69,16 @@ See the exported TypeScript types for the complete contract. Invalid IDs, langua
 
 ## Local authoring site
 
-The live site at <https://a11y-playtest-captioner.sociobot.in> lets you create states, add language variants and ordered cues, rehearse entirely by keyboard, and import/export compatible JSON. Drafts stay in browser storage and the app works offline after the first visit.
+The live site at <https://a11y-playtest-captioner.sociobot.in> lets you create states, add language variants and ordered cues, rehearse by keyboard, and export project JSON. Try it immediately at <https://a11y-playtest-captioner.sociobot.in/demo>.
+
+The demo opens the two-state Signal Hollow sample in a separate browser-storage namespace. Sample data never changes your real draft. **Free: no account or payment is needed to use the demo.** Choose **Start for real** to discard its demo data and open an empty local workspace. The workspace works offline after the first visit.
 
 ```sh
 npm install
 npm run dev
 ```
 
-Open the printed local URL. No account, analytics, network speech service, or third-party runtime script is used.
+Open the printed local URL. The demo makes no cross-origin product requests while you author or use browser speech.
 
 ## Test, build, and package
 
@@ -86,15 +88,15 @@ npm run build
 npm pack --dry-run
 ```
 
-`npm run build` emits ESM, CommonJS, and TypeScript declarations under `dist/lib`, plus the deployable documentation site under `dist/site` with `index.html` at that root.
+`npm test` includes a packed, strict NodeNext TypeScript consumer and all claim checks. `npm run build` emits ESM, CommonJS, and TypeScript declarations under `dist/lib`, plus the deployable documentation site under `dist/site` with `index.html` at that root.
 
 ## Deploy
 
-Deploy `dist/site` as a static site. For the factory's Azure Static Web Apps deployment, the included `staticwebapp.config.json` applies the content-security, permissions, referrer, and immutable hashed-asset cache policies; `_headers` mirrors that policy for compatible static hosts. The factory owns registry publishing and deployment credentials; contributors should not publish directly.
+Deploy `dist/site` as a static site. For the factory's Azure Static Web Apps deployment, the included `staticwebapp.config.json` applies content-security, permissions, referrer, cache, `/demo`, and styled 404 response policies; `_headers` mirrors applicable headers for compatible static hosts. The factory owns registry publishing and deployment credentials; contributors should not publish directly.
 
 ## Privacy and scope
 
-Projects are stored only in the current browser unless exported. Read the in-app [privacy page](https://a11y-playtest-captioner.sociobot.in/privacy/) and [terms](https://a11y-playtest-captioner.sociobot.in/terms/). This tool supports authoring and rehearsal; it does not replace testing with disabled players and does not claim conformance with any standard.
+Projects are stored in the current browser unless exported. Read the in-app [privacy page](https://a11y-playtest-captioner.sociobot.in/privacy/) and [terms](https://a11y-playtest-captioner.sociobot.in/terms/). This tool supports authoring and rehearsal; it does not replace testing with disabled players and does not claim conformance with any standard.
 
 ## License
 

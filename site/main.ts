@@ -4,7 +4,10 @@ import "./styles.css";
 import { createCaptioner, CaptionerValidationError } from "../src/index";
 import { emptyProject, sampleProject, type EditableCue, type EditableState, type Project } from "./sample";
 
-const STORAGE_KEY = "a11y-playtest-captioner:project:v1";
+const REAL_STORAGE_KEY = "a11y-playtest-captioner:project:v1";
+const DEMO_STORAGE_KEY = "demo:a11y-playtest-captioner:project:v1";
+const isDemo = location.pathname.replace(/\/$/, "") === "/demo" || new URLSearchParams(location.search).get("demo") === "1";
+const STORAGE_KEY = isDemo ? DEMO_STORAGE_KEY : REAL_STORAGE_KEY;
 const app = required<HTMLElement>("captioner-app");
 const stateList = required<HTMLElement>("state-list");
 const authorContent = required<HTMLElement>("author-content");
@@ -19,6 +22,15 @@ let cueIndex = -1;
 let undoAction: (() => void) | null = null;
 let toastTimer = 0;
 
+if (isDemo) {
+  document.title = "Demo — A11y Playtest Captioner";
+  const demoUrl = new URL("/demo", location.origin).href;
+  document.querySelector<HTMLLinkElement>("link[rel='canonical']")?.setAttribute("href", demoUrl);
+  document.querySelector<HTMLMetaElement>("meta[property='og:url']")?.setAttribute("content", demoUrl);
+  document.querySelector<HTMLMetaElement>("meta[name='description']")?.setAttribute("content", "Try the isolated sample workspace for browser-game caption authoring.");
+  document.getElementById("demo-banner")?.removeAttribute("hidden");
+}
+
 function required<T extends HTMLElement>(id: string): T {
   const value = document.getElementById(id);
   if (!value) throw new Error(`Missing #${id}`);
@@ -32,7 +44,7 @@ function clone<T>(value: T): T {
 function loadProject(): Project {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return emptyProject();
+    if (!stored) return isDemo ? sampleProject() : emptyProject();
     const parsed = JSON.parse(stored) as Project;
     validateProjectShape(parsed, false);
     return parsed;
@@ -90,7 +102,7 @@ function uniqueId(base: string, used: string[]): string {
 function save(message = "Saved locally"): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
-    saveState.textContent = message;
+    saveState.textContent = isDemo && message === "Saved locally" ? "Saved in demo only" : message;
     saveState.classList.remove("error-text");
   } catch {
     saveState.textContent = "Could not save in this browser";
@@ -548,6 +560,25 @@ function replaceProject(next: Project, message: string): void {
   });
 }
 
+function resetDemo(): void {
+  project = sampleProject();
+  selectedId = project.states[0]?.id ?? null;
+  selectedLocale = project.defaultLocale;
+  cueIndex = -1;
+  save("Demo reset with sample data");
+  render();
+  stateButton(selectedId)?.focus();
+  showToast("Demo reset with sample data.");
+}
+
+function startForReal(): void {
+  try {
+    localStorage.removeItem(DEMO_STORAGE_KEY);
+  } finally {
+    window.location.assign("/");
+  }
+}
+
 required<HTMLButtonElement>("add-state").addEventListener("click", addState);
 required<HTMLButtonElement>("load-sample").addEventListener("click", () => replaceProject(sampleProject(), "Example project loaded"));
 required<HTMLInputElement>("import-file").addEventListener("change", async (event) => {
@@ -589,6 +620,11 @@ required<HTMLButtonElement>("copy-install").addEventListener("click", async (eve
   }
 });
 
+if (isDemo) {
+  required<HTMLButtonElement>("reset-demo").addEventListener("click", resetDemo);
+  required<HTMLButtonElement>("start-for-real").addEventListener("click", startForReal);
+}
+
 const offlineStatus = required<HTMLElement>("offline-status");
 function updateConnection(isOnline = navigator.onLine): void {
   const text = offlineStatus.querySelector("span:last-child");
@@ -602,6 +638,7 @@ window.addEventListener("offline", () => updateConnection(false));
 updateConnection();
 
 render();
+if (isDemo) save("Demo sample ready");
 if (startupMessage) showToast(startupMessage);
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {

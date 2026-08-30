@@ -1,6 +1,6 @@
 const CACHE = "a11y-captioner-__BUILD_ID__";
 const BUILD_ID = "__BUILD_ID__";
-const PAGES = ["/", "/privacy/", "/terms/"];
+const PAGES = ["/", "/demo", "/privacy/", "/terms/"];
 const BUILD_ASSETS = []; // __BUILD_ASSETS__
 const SHELL = [...PAGES, "/hero-caption-landscape.webp", "/hero-caption-landscape-480.webp", "/favicon.svg", ...BUILD_ASSETS];
 

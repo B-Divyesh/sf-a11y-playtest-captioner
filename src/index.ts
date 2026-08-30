@@ -9,7 +9,7 @@ import type {
   FocusDirection,
   LocalizedText,
   MountOptions
-} from "./types";
+} from "./types.js";
 
 export type {
   ActiveCueSnapshot,
@@ -22,7 +22,7 @@ export type {
   FocusDirection,
   LocalizedText,
   MountOptions
-} from "./types";
+} from "./types.js";
 
 export class CaptionerValidationError extends Error {
   constructor(message: string) {

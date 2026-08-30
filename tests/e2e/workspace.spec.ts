@@ -104,6 +104,13 @@ test("authors a state and rehearses its focus order with the keyboard", async ({
   await expect(page.locator("#preview-description")).toContainText("north gate is closing");
 });
 
+test("opens the isolated sample workspace from the first-screen action", async ({ page }) => {
+  await page.getByRole("link", { name: "Try it with sample data" }).click();
+  await page.waitForURL(/\/demo$/);
+  await expect(page.getByLabel("Demo controls")).toBeVisible();
+  await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
+});
+
 test("keeps natural Tab order through state authoring after immediate saves", async ({ page }) => {
   await page.getByRole("button", { name: "Add first state" }).click();
 
@@ -218,6 +225,13 @@ test("loads, exports, and restores the example project", async ({ page }) => {
   await expect(page.getByText("Ravine crossing", { exact: true }).first()).toBeVisible();
 });
 
+test("keeps Add action at least 44px tall on desktop and mobile", async ({ page }) => {
+  await page.getByRole("button", { name: "Load example project" }).click();
+  const box = await page.getByRole("button", { name: "Add action" }).boundingBox();
+  if (!box) throw new Error("Add action was not measurable.");
+  expect(box.height).toBeGreaterThanOrEqual(44);
+});
+
 test("has no axe accessibility violations", async ({ page }) => {
   await page.getByRole("button", { name: "Load example project" }).click();
   const results = await new AxeBuilder({ page: page as never }).analyze();
@@ -242,7 +256,7 @@ test("reopens the workspace offline after the first visit", async ({ page, conte
     // The heading is static HTML; wait for the module to finish wiring its
     // connection listener before asserting the dynamic offline status.
     await expect(page.locator("#captioner-app")).toHaveAttribute("aria-busy", "false");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Describe what the canvas can’t say.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Caption game states before playtests");
     // Playwright's mobile network emulation can leave navigator.onLine unchanged
     // and does not consistently emit this browser event. Dispatch the same
     // platform signal a real offline transition supplies.

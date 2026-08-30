@@ -12,6 +12,7 @@ function injectOfflineAssets() {
       const assets = (await readdir(resolve(output, "assets"))).map((file) => `/assets/${file}`);
       const workerPath = resolve(output, "sw.js");
       const worker = await readFile(workerPath, "utf8");
+      const pageFiles = ["index.html", "privacy/index.html", "terms/index.html", "404.html"];
       const shellFiles = [
         "index.html",
         "privacy/index.html",
@@ -30,6 +31,12 @@ function injectOfflineAssets() {
       ).replaceAll("__BUILD_ID__", buildId);
       if (injected === worker || injected.includes("__BUILD_ID__")) throw new Error("Service worker build markers were not injected.");
       await writeFile(workerPath, injected);
+      await Promise.all(pageFiles.map(async (file) => {
+        const pagePath = resolve(output, file);
+        const page = await readFile(pagePath, "utf8");
+        if (!page.includes("__BUILD_ID__")) throw new Error(`Build marker was not found in ${file}.`);
+        await writeFile(pagePath, page.replaceAll("__BUILD_ID__", buildId));
+      }));
     }
   };
 }
@@ -48,7 +55,8 @@ export default defineConfig({
       input: {
         main: "site/index.html",
         privacy: "site/privacy/index.html",
-        terms: "site/terms/index.html"
+        terms: "site/terms/index.html",
+        notFound: "site/404.html"
       }
     }
   },
